@@ -3,11 +3,8 @@
 from ultrastar_pitch import UltraStarPitch as upitch
 import os
 
-test_dir = "/home/ruben/shared/workspace/usdx_pitch/in/Velvet R. Wings - Cutie-H Equestria/"
-
 def main():
-    #work_dir = os.getcwd()
-    work_dir = test_dir
+    work_dir = os.getcwd()
     
     print("start utility!")
     test = upitch(sample_rate=16000, fft_len=2048, fg1=140)

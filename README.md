@@ -12,7 +12,7 @@ For Windows x64 there is a precompiled [executable](https://my.pcloud.com/publin
 This binary still depends on ffmpeg, which can be installed according to this [tutorial](https://de.wikihow.com/FFmpeg-unter-Windows-installieren).
 
 ## dependencies
-If you using the binary, just follow the link above, otherwise continue reading.
+If you are using the binary, just follow the link above, otherwise continue reading.
 ### windows
 Install the newest version of [Python 3](https://www.python.org/downloads/windows/)  
 Install the newest build of [ffmpeg](https://ffmpeg.zeranoe.com/builds/)  
@@ -25,18 +25,18 @@ Open a terminal and type:
 
 ## development guide
 ### build instructions
-!!!not implemented at this point!!!
-The software can be compiled into a single standalone binary. To achieve this additional requirements need to be installed.
-`pip install pyinstaller pywin32 setuptools pypiwin32`
+!!!not implemented at this point!!!  
+The software can be compiled into a single standalone binary. To achieve this, additional requirements need to be installed.
+`pip install pyinstaller pywin32 setuptools pypiwin32`  
 to be continued ...
 
 ### implementation
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file 
 and gets split into the predefined syllables. These chunks will then be separated in blocks to be fourier transformed and averaged.
-The fft gets iterated and the base tone is added to its first two harmonics. The biggest value indicated the pitch.
+The fft gets iterated and the base tone is added to its first two harmonics. The greatest value indicated expected to be the desired pitch.
 
 ### accuracy
-The precision of this method vary strongly with the analyzed audio. For example a ballad with slow background music and strong female voice
+The precision of this method vary strongly with the analyzed audio. For example a ballad with slow background music and a strong female voice
 can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.
 
 ### todo
