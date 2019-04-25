@@ -3,7 +3,6 @@
 from pydub import AudioSegment
 import os
 import numpy as np
-from sklearn.metrics import confusion_matrix
 
 class UltraStarPitch(object):
     # pitch map for conversion
@@ -191,20 +190,39 @@ class UltraStarPitch(object):
  
     
     # test accuracy with pretranscripted song
-    def draw_conf_mat(self):
+    def draw_confusion_matrix(self):
+        # create a list with for true and predicted pitches
         tmp = [row[2] for row in self.__usdx_data]
-        y_true = [self.pitch_map[x % 12] for x in tmp]
+        y_true = [x % 12 for x in tmp]
         tmp = [row[3] for row in self.__usdx_data]
-        y_pred = [self.get_pitch(x, "ascii") for x in tmp]
-        labels=self.pitch_map.values()
+        y_pred = [self.get_pitch(x, form="short") for x in tmp]
+        labels=list(self.pitch_map.values())
         
+        # calculate correctly predicted pitches
         tmp = 0
         for i in enumerate(y_true):
             if y_true[i[0]] == y_pred[i[0]]:
                 tmp = tmp + 1
+        
+        # print statistical data
         print(str(len(y_true)) + " samples")
         print(str(tmp / len(y_true) * 100) + "% accuracy")
-        print(confusion_matrix(y_true, y_pred, list(labels)))      
+        
+        # calculate confusion matrix
+        c_mat = np.zeros((len(labels),len(labels)))
+        for i in range(len(y_true)):
+            c_mat[y_true[i]][y_pred[i]] += 1
+            
+        # print detailed confusion matrix
+        print("pred", end="\t")
+        for label in labels:
+            print(label, end="\t")
+        print("\ntrue") 
+        for i in range(len(labels)):
+            print(labels[i], end="\t")
+            for val in c_mat[i]:
+                print(int(val), end="\t")
+            print("")    
 
 
 
