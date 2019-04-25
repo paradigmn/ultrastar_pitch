@@ -42,6 +42,7 @@ can get an accuracy of over 90%, while a rock song with loud background music an
 ### todo
 * get pyinstaller running reliable
 * maybe replace pydub as converter interface
+* add exception handling
 * change from fft algorithm to wavlet transformation, to get a better overall frequency resolution
 * implement a Qt user interface for easier access
 
