@@ -4,9 +4,9 @@ from pydub import AudioSegment
 import os
 import numpy as np
 
-class UltraStarPitch(object):
+class PitchDetection(object):
     # pitch map for conversion
-    pitch_map = {0 : "C", 1 : "Cis", 2 : "D", 3 : "Dis", 4 : "E", 5 : "F", 6 : "Fis", 7 : "G", 8 : "Gis", 9 : "A", 10 : "As", 11 : "B"}
+    pitch_map = {0 : "C ", 1 : "C#", 2 : "D ", 3 : "D#", 4 : "E ", 5 : "F ", 6 : "F#", 7 : "G ", 8 : "G#", 9 : "A ", 10 : "A#", 11 : "B "}
     # mp3 file name
     __usdx_song = "song.mp3"
     # pitch file name
@@ -206,7 +206,7 @@ class UltraStarPitch(object):
         
         # print statistical data
         print(str(len(y_true)) + " samples")
-        print(str(tmp / len(y_true) * 100) + "% accuracy")
+        print(str(tmp / len(y_true) * 100) + "% accuracy\n")
         
         # calculate confusion matrix
         c_mat = np.zeros((len(labels),len(labels)))
@@ -222,8 +222,5 @@ class UltraStarPitch(object):
             print(labels[i], end="\t")
             for val in c_mat[i]:
                 print(int(val), end="\t")
-            print("")    
-
-
-
+            print("")  
 
