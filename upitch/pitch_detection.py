@@ -161,15 +161,6 @@ class PitchDetection(object):
                 line = ' '.join(line)
                 i = i + 1    
             file_new.write(line)            
-            
-        
-    # return numpy array of averaged fft samples
-    def get_avg_fft(self):
-        return(self.__fft_arr)
-
-    # return list of pitch data
-    def get_pitch_data(self):
-        return(self.__usdx_data)
     
     # creates training data for deep learning
     def create_training_data(self, data_dir, label="original"):
