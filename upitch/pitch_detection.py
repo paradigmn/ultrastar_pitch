@@ -1,8 +1,9 @@
 # this file defines a class used to automatically calculate the pitch for a given USDX project
 
-from pydub import AudioSegment
-import os
+import os, subprocess
 import numpy as np
+import scipy.io.wavfile
+from IPython.utils.io import stdout, stderr
 
 class PitchDetection(object):
     # pitch map for conversion
@@ -104,9 +105,13 @@ class PitchDetection(object):
         
     # load audio into mono numpy array
     def __load_samples(self):
-        song = AudioSegment.from_mp3(os.path.join(self.__proj_dir, self.__usdx_song))
-        song = song.set_frame_rate(self.__sample_rate)
-        self.__samples_mono = np.array(song.set_channels(1).get_array_of_samples())
+        # convert mp3 to mono wav
+        subprocess.run(['ffmpeg', '-i', os.path.join(self.__proj_dir, self.__usdx_song), '-y', '-ac', '1', '-ar', 
+                        str(self.__sample_rate), os.path.join(self.__proj_dir, "tmp.wav")], 
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # load wav into numpy array for processing
+        samples = scipy.io.wavfile.read(os.path.join(self.__proj_dir, "tmp.wav"))
+        self.__samples_mono = samples[1]
     
     # analyse usdx file    
     def __parse_data(self):
@@ -161,6 +166,15 @@ class PitchDetection(object):
                 line = ' '.join(line)
                 i = i + 1    
             file_new.write(line)            
+            
+        
+    # return numpy array of averaged fft samples
+    def get_avg_fft(self):
+        return(self.__fft_arr)
+
+    # return list of pitch data
+    def get_pitch_data(self):
+        return(self.__usdx_data)
     
     # creates training data for deep learning
     def create_training_data(self, data_dir, label="original"):

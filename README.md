@@ -26,7 +26,7 @@ Open a terminal and type:
 `sudo pip3 install ultrastar-pitch`  
 
 Pip should install all dependencies automatically, if not run  
-`sudo pip3 install pydub numpy`
+`sudo pip3 install scipy numpy`
 
 ## development guide
 ### build instructions
@@ -50,17 +50,17 @@ can get an accuracy of over 90%, while a rock song with loud background music an
 To access the functionality of the PitchDetection class, an object needs to be created.  
 `test = PitchDetection()`  
 The init method can take in several positional arguments:  
-`sample_rate` the resampling frequency for analizing  
-`fft_len` the lenght of the fft window  
+`sample_rate` the resampling frequency for analyzing  
+`fft_len` the length of the fft window  
 `fg1` the lowest frequency that can be detected  
 These three arguments can drastically influence the accuracy and should't be changed unless you know exactly what you are doing.
 
 2. public methods
-These are the general methods to create an pitch analizing application  
-`load_project(proj_dir)`	read project data and begin analizing  
+These are the general methods to create an pitch analyzing application  
+`load_project(proj_dir)`	read project data and begin analyzing  
 `save_project()` save successfully converted file to disk  
-`create_training_data(data_dir, label="...")` save original or analized pitches as .csv files for machine learning applications  
-`draw_confusion_matrix()` compare accuracy of analized pitches with a confusion matrix
+`create_training_data(data_dir, label="...")` save original or analyzed pitches as .csv files for machine learning applications  
+`draw_confusion_matrix()` compare accuracy of analyzed pitches with a confusion matrix
 
 3. class methods and variables
 Some functionality, which doesn't require an object.  
@@ -68,9 +68,12 @@ Some functionality, which doesn't require an object.
 `get_pitch(freq, form="...")` turns a given frequency into pitch notation  
 `zero_pad_array(array, new_size)` zero pads a numpy array at the end
 
+### version history
+v0.1 - first running imlementation  
+v0.2 - replaced pydub by subprocess and scipy wavfile read
+
 ### todo
 * get pyinstaller running reliable
-* maybe replace pydub as converter interface
 * add exception handling
 * change from fft algorithm to wavlet transformation, to get a better overall frequency resolution
 * implement GUI for easier access
