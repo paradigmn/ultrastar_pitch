@@ -1,9 +1,8 @@
 # this file defines a class used to automatically calculate the pitch for a given USDX project
 
-import os, subprocess
+import os, sys, subprocess
 import numpy as np
 import scipy.io.wavfile
-from IPython.utils.io import stdout, stderr
 
 class PitchDetection(object):
     # pitch map for conversion
@@ -32,6 +31,12 @@ class PitchDetection(object):
         self.__fft_arr = []
         # counter for naming training data
         self.__file_counter = 0
+        
+        # change the ffmpeg path depending on using script or executable    
+        if getattr(sys,'frozen',False):
+            self.FFMPEG = os.path.join(sys._MEIPASS, 'ffmpeg.exe')
+        else:
+            self.FFMPEG = 'ffmpeg'
         
     @classmethod
     # return the pitch corresponding to a given frequency in different formats
@@ -106,7 +111,7 @@ class PitchDetection(object):
     # load audio into mono numpy array
     def __load_samples(self):
         # convert mp3 to mono wav
-        subprocess.run(['ffmpeg', '-i', os.path.join(self.__proj_dir, self.__usdx_song), '-y', '-ac', '1', '-ar', 
+        subprocess.run([self.FFMPEG, '-i', os.path.join(self.__proj_dir, self.__usdx_song), '-y', '-ac', '1', '-ar', 
                         str(self.__sample_rate), os.path.join(self.__proj_dir, "tmp.wav")], 
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # load wav into numpy array for processing
