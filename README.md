@@ -10,7 +10,7 @@ If all dependencies are met, just copy this file in your project folder and run 
 To work properly, it is necessary to name the usdx file "notes.txt" and the song file "song.mp3".
 If everything went well, a new file "notes.txt.new" should appear.
 
-For Windows 7 x64 there is a precompiled [executable](hhttps://my.pcloud.com/publink/show?code=XZE8sU7ZW58K4ntkw0kx2vRuulB0HYVx2ITy) available. 
+For Windows 7 x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=XZE8sU7ZW58K4ntkw0kx2vRuulB0HYVx2ITy) available. 
 It can be used the same way as described above.
 
 ## dependencies
