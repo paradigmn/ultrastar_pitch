@@ -11,7 +11,6 @@ setup(name='ultrastar_pitch',
       classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python :: 3.7',
-        'Topic :: Audio Analyzing :: Karaoke',
       ],
       url='https://github.com/paradigmn/ultrastar_pitch',
       author='paradigm',
