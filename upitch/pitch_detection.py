@@ -6,7 +6,7 @@ import scipy.io.wavfile
 
 class PitchDetection(object):
     # pitch map for conversion
-    pitch_map = {0 : "C ", 1 : "C#", 2 : "D ", 3 : "D#", 4 : "E ", 5 : "F ", 6 : "F#", 7 : "G ", 8 : "G#", 9 : "A ", 10 : "A#", 11 : "B "}
+    pitch_map = {0 : "C_", 1 : "C#", 2 : "D_", 3 : "D#", 4 : "E_", 5 : "F_", 6 : "F#", 7 : "G_", 8 : "G#", 9 : "A_", 10 : "A#", 11 : "B_"}
     # mp3 file name
     __usdx_song = "song.mp3"
     # pitch file name
@@ -31,7 +31,6 @@ class PitchDetection(object):
         self.__fft_arr = []
         # counter for naming training data
         self.__file_counter = 0
-        
         # change the ffmpeg path depending on using script or executable    
         if getattr(sys,'frozen',False):
             self.FFMPEG = os.path.join(sys._MEIPASS, 'ffmpeg.exe')
@@ -116,6 +115,7 @@ class PitchDetection(object):
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # load wav into numpy array for processing
         samples = scipy.io.wavfile.read(os.path.join(self.__proj_dir, "tmp.wav"))
+        os.remove(os.path.join(self.__proj_dir, "tmp.wav"))
         self.__samples_mono = samples[1]
     
     # analyse usdx file    
@@ -144,6 +144,27 @@ class PitchDetection(object):
             pitch_samples = self.__samples_mono[start_sample:end_sample]
             self.__fft_arr.append(self.__avg_fft(pitch_samples))
             data[3] = self.__fft_to_pitch_freq(self.__fft_arr[-1])
+    
+    # helper function to yield and display statistical data        
+    def __get_statistics(self):
+        # create a list with for true and predicted pitches
+        tmp = [row[2] for row in self.__usdx_data]
+        y_true = [x % 12 for x in tmp]
+        tmp = [row[3] for row in self.__usdx_data]
+        y_pred = [self.get_pitch(x, form="short") for x in tmp] 
+        # calculate correctly predicted pitches
+        tmp = 0
+        for i in enumerate(y_true):
+            if y_true[i[0]] == y_pred[i[0]]:
+                tmp = tmp + 1      
+        # print statistical data
+        print(str(len(y_true)) + " samples")
+        if (len(y_true)):
+            print(str(tmp / len(y_true) * 100) + "% accuracy\n")
+        else:
+            print()          
+        # return sample vectors
+        return y_true, y_pred
                
     # project init    
     def load_project(self, proj_dir):
@@ -172,7 +193,6 @@ class PitchDetection(object):
                 i = i + 1    
             file_new.write(line)            
             
-        
     # return numpy array of averaged fft samples
     def get_avg_fft(self):
         return(self.__fft_arr)
@@ -182,47 +202,45 @@ class PitchDetection(object):
         return(self.__usdx_data)
     
     # creates training data for deep learning
-    def create_training_data(self, data_dir, label="original"):
+    def build_training_data(self, data_dir, label="original"):
+        # print informative statistics
+        self.__get_statistics()
         # create subfolder
         for pitch in self.pitch_map:
-            os.makedirs(os.path.join(data_dir, self.pitch_map[pitch]), exist_ok=True)  
+            pitch_dir = os.path.join(data_dir, self.pitch_map[pitch])
+            os.makedirs(pitch_dir, exist_ok=True)
         # create a csv file for each analysed pitch   
         for i, fft_spectrum in enumerate(self.__fft_arr):
             fft_spectrum = fft_spectrum / max(fft_spectrum)
             if label == "original":
                 folder = self.pitch_map[self.__usdx_data[i][2] % 12]
             else:
-                folder = self.get_pitch(self.__usdx_data[i][3], "ascii")
-               
-            csv_path = os.path.join(data_dir, (str(folder) + "/" + str(self.__file_counter) + ".csv")) 
-            np.savetxt(csv_path, fft_spectrum, delimiter="\r\n")         
+                folder = self.get_pitch(self.__usdx_data[i][3], "ascii")         
+            csv_path = os.path.join(data_dir, (str(folder) + "/" + str(self.__file_counter) + ".csv"))
+            if not os.path.exists(csv_path):
+                np.savetxt(csv_path, fft_spectrum, delimiter="\r\n")         
             self.__file_counter += 1
  
+    # remove previously created training data
+    def clear_training_data(self, data_dir):
+        for pitch in self.pitch_map:
+            pitch_dir = os.path.join(data_dir, self.pitch_map[pitch])
+            if os.path.exists(pitch_dir):
+                filelist = [x for x in os.listdir(pitch_dir) if x.endswith(".csv")]
+                for file in filelist:
+                    os.remove(os.path.join(pitch_dir, file))
+                print("cleared " + pitch_dir)
+        print()
     
     # test accuracy with pretranscripted song
     def draw_confusion_matrix(self):
         # create a list with for true and predicted pitches
-        tmp = [row[2] for row in self.__usdx_data]
-        y_true = [x % 12 for x in tmp]
-        tmp = [row[3] for row in self.__usdx_data]
-        y_pred = [self.get_pitch(x, form="short") for x in tmp]
-        labels=list(self.pitch_map.values())
-        
-        # calculate correctly predicted pitches
-        tmp = 0
-        for i in enumerate(y_true):
-            if y_true[i[0]] == y_pred[i[0]]:
-                tmp = tmp + 1
-        
-        # print statistical data
-        print(str(len(y_true)) + " samples")
-        print(str(tmp / len(y_true) * 100) + "% accuracy\n")
-        
+        y_true, y_pred = self.__get_statistics()
+        labels=list(self.pitch_map.values())      
         # calculate confusion matrix
         c_mat = np.zeros((len(labels),len(labels)))
         for i in range(len(y_true)):
-            c_mat[y_true[i]][y_pred[i]] += 1
-            
+            c_mat[y_true[i]][y_pred[i]] += 1         
         # print detailed confusion matrix
         print("pred", end="\t")
         for label in labels:
