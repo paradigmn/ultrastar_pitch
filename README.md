@@ -84,6 +84,8 @@ v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore
 
 ### todo
 * add exception handling
+* switch to conditional imports of dependencies
+* add experimental deep learning analysis (Keras+Tensorflow)
 * change from fft algorithm to wavlet transformation, to get a better overall frequency resolution
 * implement GUI for easier access
 
