@@ -67,8 +67,8 @@ These three arguments can drastically influence the accuracy and should't be cha
 These are the general methods to create an pitch analyzing application  
 `load_project(proj_dir)`	read project data and begin analyzing  
 `save_project()` save successfully converted file to disk  
-`build_training_data(data_dir, label="...")` save original or analyzed pitches as .csv files for machine learning applications 
-`clear_training_data(data_dir)` removes previously generated data to start fresh 
+`build_training_data(data_dir, label="...")` save original or analyzed pitches as .csv files for machine learning applications  
+`clear_training_data(data_dir)` removes previously generated data to start fresh  
 `draw_confusion_matrix()` compare accuracy of analyzed pitches with a confusion matrix
 
 3. class methods and variables  

@@ -215,10 +215,11 @@ class PitchDetection(object):
             if label == "original":
                 folder = self.pitch_map[self.__usdx_data[i][2] % 12]
             else:
-                folder = self.get_pitch(self.__usdx_data[i][3], "ascii")         
-            csv_path = os.path.join(data_dir, (str(folder) + "/" + str(self.__file_counter) + ".csv"))
-            if not os.path.exists(csv_path):
-                np.savetxt(csv_path, fft_spectrum, delimiter="\r\n")         
+                folder = self.get_pitch(self.__usdx_data[i][3], "ascii")
+                
+            data_path = os.path.join(data_dir, (str(folder) + "/" + str(self.__file_counter)))
+            if not os.path.exists(data_path + ".npy"):
+                np.save(data_path, fft_spectrum)     
             self.__file_counter += 1
  
     # remove previously created training data
@@ -226,7 +227,7 @@ class PitchDetection(object):
         for pitch in self.pitch_map:
             pitch_dir = os.path.join(data_dir, self.pitch_map[pitch])
             if os.path.exists(pitch_dir):
-                filelist = [x for x in os.listdir(pitch_dir) if x.endswith(".csv")]
+                filelist = [x for x in os.listdir(pitch_dir) if x.endswith(".npy")]
                 for file in filelist:
                     os.remove(os.path.join(pitch_dir, file))
                 print("cleared " + pitch_dir)
