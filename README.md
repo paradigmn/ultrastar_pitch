@@ -13,6 +13,10 @@ If everything went well, a new file "notes.txt.new" should appear.
 For Windows 7 x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=XZE8sU7ZW58K4ntkw0kx2vRuulB0HYVx2ITy) available. 
 It can be used the same way as described above.
 
+### deep learning
+If you want to improve the accuracy, you can use the the "keras\_get\_pitch" script or executable. It uses the deep learning 
+model located in the "keras" folder. 
+
 ## dependencies
 If you are using the binary, everything should run out of the box. 
 In case of error occurrence, try to install Microsoft Visual C++ Redistributable x64 (2010+2015).  
@@ -26,10 +30,14 @@ Open CMD/Powershell and type:
 ### linux (debian)
 Open a terminal and type:  
 `sudo apt-get install python3 python3-pip ffmpeg`  
-`sudo pip3 install ultrastar-pitch`  
+`pip install ultrastar-pitch`  
 
 Pip should install all dependencies automatically, if not run  
-`sudo pip3 install scipy numpy`
+`pip install scipy numpy`
+
+### deep learning
+The model was build using Keras and Tensorflow, which need to be installed additionally.  
+`pip install keras tensorflow`
 
 ## development guide
 ### build instructions (windows only)
@@ -37,20 +45,34 @@ The software can be compiled into a single standalone binary. To achieve this, a
 `pip install pyinstaller pywin32 setuptools pypiwin32`  
 
 The software used to generate the binary is called pyinstaller. The build recipe is called setup.spec. 
-It links to the get_pitch.py script in the example folder. To build your own application the MODULE variable within the recipe needs to 
-be changed to your own script. The same goes for FFMPEG_DIR, if your ffmpeg.exe isn't located in the standard folder.
+It links to the get_pitch.py script in the example folder. To build your own application the MODULE variable within the 
+recipe needs to be changed to your own script. The same goes for FFMPEG_DIR, if your ffmpeg.exe isn't located in the 
+standard folder.
 
 To generate the executable, change to your working directory and run  
 `pyinstaller setup.spec`
 
 ### implementation
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file 
-and gets split into the predefined syllables. These chunks will then be separated into blocks to be fourier transformed and averaged.
-The fft gets iterated and the base tone is added to its first two harmonics. The greatest value is expected to be the desired pitch.
+and gets split into the predefined syllables. These chunks will then be separated into blocks to be fourier transformed and 
+averaged. The fft gets iterated and the base tone is added to its first two harmonics. 
+The greatest value is expected to be the desired pitch.  
+  
+The deep learning analysis was trained by a large karaoke database. It uses an averaged 2048 samples fft like the 
+original algorithm but performing much better. The training data was filtered beforehand by checking the label against 
+the prediction of the algorithm.  
+The model structure can be derived from its name. E.g: "keras\_tf\_1025\_240\_120\_12\_fft\_0.model" stands for a Keras model, 
+which uses the Tensorflow backend. It takes 1025 input values, has two hidden layers with 240 and respectively 120 nodes 
+and 12 outputs. Furthermore the input was fft transformed and the model revision is 0.  
+  
+You can build and load your own model for analysis. The necessary parameter and methods are listed below.
 
 ### accuracy
-The precision of this method vary strongly with the analyzed audio. For example a ballad with slow background music and a strong female voice
-can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.
+The precision of this method vary greatly with the analyzed audio. For example a ballad with slow background music and 
+a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice 
+can drop below 30%.  
+  
+The average accuracy of the original approach is 54%, while the deep learning one is about 75% correct.
 
 ### functionality
 
@@ -67,9 +89,12 @@ These three arguments can drastically influence the accuracy and should't be cha
 These are the general methods to create an pitch analyzing application  
 `load_project(proj_dir)`	read project data and begin analyzing  
 `save_project()` save successfully converted file to disk  
-`build_training_data(data_dir, label="...")` save original or analyzed pitches as .csv files for machine learning applications  
+`analyse_audio(audio_samples)` takes a numpy audio array and returns the pitch and and averaged fft array  
+`build_training_data(data_dir, mode="...")` save original or analyzed pitches as numpy binary for machine learning applications  
 `clear_training_data(data_dir)` removes previously generated data to start fresh  
-`draw_confusion_matrix()` compare accuracy of analyzed pitches with a confusion matrix
+`draw_confusion_matrix()` compare accuracy of analyzed pitches with a confusion matrix  
+`get_statistics()` print accuracy and other statistical data  
+`load_keras_model(model_path)` load deep learning model to improove accuracy
 
 3. class methods and variables  
 Some functionality, which doesn't require an object.  
@@ -80,13 +105,12 @@ Some functionality, which doesn't require an object.
 ### version history
 v0.10 - first running implementation  
 v0.20 - replaced pydub by subprocess and scipy wavfile read -> faster processing  
-v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore
+v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore  
+v0.30 - added deep learning support and improved source code readability
 
 ### todo
-* add exception handling
-* switch to conditional imports of dependencies
-* add experimental deep learning analysis (Keras+Tensorflow)
-* change from fft algorithm to wavlet transformation, to get a better overall frequency resolution
+* improve exception handling
+* change from fft algorithm to wavelet transformation, to get a better overall frequency resolution
 * implement GUI for easier access
 
 
