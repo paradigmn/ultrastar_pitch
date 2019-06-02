@@ -5,13 +5,16 @@ This python script is an attempt to automate the pitch detection for USDX projec
 The core file of this project is "pitch_detection.py" which provides the functionality 
 for parsing and processing USDX projects. 
 
-The examples folder provides the "get_pitch.py" script, which calls the mandatory functions to process a USDX project.
+The scripts folder provides the "get_pitch.py" script, which calls the mandatory functions to process a USDX project.
 If all dependencies are met, just copy this file in your project folder and run it. 
 To work properly, it is necessary to name the usdx file "notes.txt" and the song file "song.mp3".
 If everything went well, a new file "notes.txt.new" should appear.
 
-For Windows 7 x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=XZE8sU7ZW58K4ntkw0kx2vRuulB0HYVx2ITy) available. 
-It can be used the same way as described above.
+For Windows 7 x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37) available. 
+It can be used the same way as described above.  
+  
+Note: Some virus scanner identify the binary as Bitcoin miner and therefore prevent the execution. This is unfortunate but not in my power to
+control. Either add an exception or use the script instead.
 
 ### deep learning
 If you want to improve the accuracy, you can use the the "keras\_get\_pitch" script or executable. It uses the deep learning 
@@ -33,13 +36,9 @@ Open a terminal and type:
 `pip install ultrastar-pitch`  
 
 Pip should install all dependencies automatically, if not run  
-`pip install scipy numpy`
+`pip install scipy numpy keras tensorflow`
 
-### deep learning
-The model was build using Keras and Tensorflow, which need to be installed additionally.  
-`pip install keras tensorflow`
-
-## development guide
+## developer information
 ### build instructions (windows only)
 The software can be compiled into a single standalone binary. To achieve this, additional requirements need to be installed.  
 `pip install pyinstaller pywin32 setuptools pypiwin32`  
@@ -72,7 +71,7 @@ The precision of this method vary greatly with the analyzed audio. For example a
 a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice 
 can drop below 30%.  
   
-The average accuracy of the original approach is 54%, while the deep learning one is about 75% correct.
+The average accuracy of the original approach is 54%, while deep learning is about 75% correct.
 
 ### functionality
 
@@ -106,7 +105,8 @@ Some functionality, which doesn't require an object.
 v0.10 - first running implementation  
 v0.20 - replaced pydub by subprocess and scipy wavfile read -> faster processing  
 v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore  
-v0.30 - added deep learning support and improved source code readability
+v0.30 - added deep learning support and improved source code readability  
+v0.31 - substitute license field with classifier and updated installer script
 
 ### todo
 * improve exception handling

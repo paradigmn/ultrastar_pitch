@@ -5,20 +5,27 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.21',
+      version='0.31',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Intended Audience :: End Users/Desktop',
+        'Operating System :: Microsoft :: Windows',
+        'Operating System :: POSIX :: Linux',
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
         'Programming Language :: Python :: 3.7',
+        'Topic :: Multimedia :: Sound/Audio :: Analysis',
+        'Topic :: Scientific/Engineering :: Information Analysis',
       ],
       url='https://github.com/paradigmn/ultrastar_pitch',
       author='paradigm',
       author_email='ultrastarpitch@gmail.com',
-      license='GPL2.0',
       packages=['upitch'],
       install_requires=['numpy',
-                        'scipy',],
+                        'scipy',
+                        'keras',
+                        'tensorflow'],
       include_package_data=True,
       zip_safe=False)
 
