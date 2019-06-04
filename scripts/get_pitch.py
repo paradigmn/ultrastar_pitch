@@ -9,7 +9,7 @@ def main():
     
     print("start utility!")
     # set sampling rate fft window size and lower cut of frequency
-    test = PitchDetection(sample_rate=16000, fft_len=2048, fg1=140)
+    test = PitchDetection(sample_rate=16000, fft_len=2048, fg1=140, method="calc")
     # start processing
     print("load project")
     test.load_project(work_dir)

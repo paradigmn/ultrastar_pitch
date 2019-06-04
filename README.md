@@ -82,6 +82,7 @@ The init method can take in several positional arguments:
 `sample_rate` the resampling frequency for analyzing  
 `fft_len` the length of the fft window  
 `fg1` the lowest frequency that can be detected  
+`method` switch between classic and deep learning analysis  
 These three arguments can drastically influence the accuracy and should't be changed unless you know exactly what you are doing.
 
 2. public methods  
@@ -89,6 +90,7 @@ These are the general methods to create an pitch analyzing application
 `load_project(proj_dir)`	read project data and begin analyzing  
 `save_project()` save successfully converted file to disk  
 `analyse_audio(audio_samples)` takes a numpy audio array and returns the pitch and and averaged fft array  
+`fft_to_pitch(fft)` takes a numpy fft array and returns the corresponding pitch  
 `build_training_data(data_dir, mode="...")` save original or analyzed pitches as numpy binary for machine learning applications  
 `clear_training_data(data_dir)` removes previously generated data to start fresh  
 `draw_confusion_matrix()` compare accuracy of analyzed pitches with a confusion matrix  
@@ -107,6 +109,8 @@ v0.20 - replaced pydub by subprocess and scipy wavfile read -> faster processing
 v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore  
 v0.30 - added deep learning support and improved source code readability  
 v0.31 - substitute license field with classifier and updated installer script
+v0.32 - added model to PyPi repo -> is now used by default
+v0.33 - using absolute paths instead of relative ones
 
 ### todo
 * improve exception handling

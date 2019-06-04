@@ -11,8 +11,10 @@ class PitchDetection(object):
     __usdx_song = "song.mp3"
     # pitch file name
     __usdx_file = "notes.txt"
+    # keras model name
+    __keras_model = "keras_tf_1025_240_120_12_fft_0.model"
     
-    def __init__(self, sample_rate=16000, fft_len=2048, fg1=140):
+    def __init__(self, sample_rate=16000, fft_len=2048, fg1=140, method="keras"):
         # sample rate for conversion
         self.__sample_rate = sample_rate
         # length of fft block
@@ -30,14 +32,21 @@ class PitchDetection(object):
         # data array: list of usdx_dicts for every pitch
         self.__usdx_data = []
         # counter for naming training data
-        self.__file_counter = 0
-        # define model variable for possible keras analysis
-        self.__model = None
+        self.__file_counter = 0     
         # change the ffmpeg path depending on using script or executable    
         if getattr(sys,'frozen',False):
             self.__FFMPEG = os.path.join(sys._MEIPASS, 'ffmpeg.exe')
         else:
             self.__FFMPEG = 'ffmpeg'
+        # load default model if deep learning analysis is demanded
+        self.__model = None
+        if method == "keras":
+            from keras.models import load_model
+            if getattr(sys,'frozen',False):
+                self.__model = load_model(os.path.join(sys._MEIPASS, self.__keras_model))
+            else:
+                keras_path = os.path.join(os.path.dirname(__file__), os.path.pardir, "keras")
+                self.__model = load_model(os.path.join(keras_path, self.__keras_model))    
         
     @classmethod
     # return the pitch corresponding to a given frequency in different formats
@@ -162,16 +171,24 @@ class PitchDetection(object):
           
     # load custom keras model for pitch detection      
     def load_keras_model(self, model_path):
-        from keras.models import load_model
+        if self.__model == None:
+            from keras.models import load_model
         self.__model = load_model(model_path)
+    
+    # turn a given fft into the corresponding pitch
+    def fft_to_pitch(self, fft):
+        if len(fft) != (self.__fft_len // 2 + 1):
+            raise ValueError
+        if (self.__model != None):
+            pitch, _ = self.__keras_fft_to_pitch(fft)
+        else:
+            pitch = self.__calc_fft_to_pitch(fft) 
+        return pitch
     
     # take an array of audio samples and return the corresponding pitch and fft
     def analyse_audio(self, audio_samples):
         fft = self.__avg_fft(audio_samples)
-        if (self.__model != None):
-            pitch, _ = self.__keras_fft_to_pitch(fft)
-        else:
-            pitch = self.__calc_fft_to_pitch(fft)  
+        pitch = self.fft_to_pitch(fft)
         return pitch, fft    
             
     
@@ -278,5 +295,4 @@ class PitchDetection(object):
             print(label, end="\t")
             for val in c_mat[i]:
                 print(int(val), end="\t")
-            print("")  
-
+            print("")
