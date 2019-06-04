@@ -1,2 +1,2 @@
 include README.rst
-include keras/keras_tf_1025_240_120_12_fft_0.model
+include upitch/keras/keras_tf_1025_240_120_12_fft_0.model

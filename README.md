@@ -111,6 +111,7 @@ v0.30 - added deep learning support and improved source code readability
 v0.31 - substitute license field with classifier and updated installer script
 v0.32 - added model to PyPi repo -> is now used by default
 v0.33 - using absolute paths instead of relative ones
+v0.34 - bug fixes
 
 ### todo
 * improve exception handling

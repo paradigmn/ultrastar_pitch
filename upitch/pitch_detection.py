@@ -45,7 +45,7 @@ class PitchDetection(object):
             if getattr(sys,'frozen',False):
                 self.__model = load_model(os.path.join(sys._MEIPASS, self.__keras_model))
             else:
-                keras_path = os.path.join(os.path.dirname(__file__), os.path.pardir, "keras")
+                keras_path = os.path.join(os.path.dirname(__file__), "keras")
                 self.__model = load_model(os.path.join(keras_path, self.__keras_model))    
         
     @classmethod
