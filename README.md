@@ -114,6 +114,10 @@ v0.33 - using absolute paths instead of relative ones
 v0.34 - bug fixes  
 
 ### todo
+* break software into easier manageable modules
+* implement spectral noise level reduction
+* reduce input features and variance by applying PCA
+* consider different machine learning techniques (Trees, Regression, SVM, Ensemble, ...)
 * improve exception handling
 * change from fft algorithm to wavelet transformation, to get a better overall frequency resolution
 * implement GUI for easier access
