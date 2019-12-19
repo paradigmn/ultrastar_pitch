@@ -38,7 +38,7 @@ class NoteParser:
         self.__file_buffer.clear()
         note_file = open(note_file, 'r', encoding="utf-8")
         # buffer file for later reuse
-        self.__file_buffer = [line for line in note_file.read().splitlines(True)]
+        self.__file_buffer = note_file.read().splitlines(True)
         for line in self.__file_buffer:
             # parse header
             if line.startswith('#'):
