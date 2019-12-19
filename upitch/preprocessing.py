@@ -2,18 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-@file          note_parser.py
-@brief         read an USDX note file and yield metadata and singable notes
+@file          preprocessing.py
+@brief         parse an USDX note file and the corresponding audio file
+               for further processing
 @author        paradigm
-@date          11-Dec-2019 21:00:00
-@version       11.12.2019, rp
-               @li creation
 """
 
 class NoteParser:
     """ read an USDX note file and makes it content available """
     def __init__(self):
-        """ define instance variables """
         # dictionary with metadata
         self.__meta = {}
         # list of dictionarys with singable notes
@@ -33,7 +30,7 @@ class NoteParser:
 
     def load_note_file(self, note_file):
         """ load metadata and notelist into iterable objects for manipulation\n
-        @param note_file USDX project file
+        @param  note_file USDX project file
         """
         self.meta.clear()
         self.singable.clear()
@@ -65,7 +62,7 @@ class NoteParser:
 
     def update_pitches(self, new_pitches):
         """ replace old singable pitches by newly calculated ones\n
-        @param new_pitches list of newly calculated pitches
+        @param  new_pitches list of newly calculated pitches
         """
         assert (len(new_pitches) == len(self.singable)), "pitches can't be updated, array size doesn't match!"
         for singable, new_pitch in zip(self.singable, new_pitches):
@@ -73,7 +70,7 @@ class NoteParser:
 
     def save_note_file(self, note_file):
         """ save updated note file under a new name\n
-        @param note_file location+name for updated USDX project file
+        @param  note_file location+name for updated USDX project file
         """
         note_file = open(note_file, 'w+', encoding="utf-8")
         singable = iter(self.singable)
@@ -84,4 +81,26 @@ class NoteParser:
                 line[3] = str(int(next(singable)["pitch"]))
                 line = ' '.join(line)
             note_file.write(line)
-            
+
+class AudioProcessor:
+    """ convert and resample audio file before dividing it into audio segments """
+    def __init__(self):
+        # tbd!
+        pass
+
+    def load_audio(self, audio_file, sample_rate=16000):
+        """ convert audio file into a wav array with a given sample rate\n
+        @param audio_file   mp3 file which will be converted\n
+        @param sample_rate  sampling frequency for the conversion
+        """
+        # tbd!
+        pass
+
+    def segment_audio(self, audio_data, segment_data):
+        """ convert audio file into a wav array with a given sample rate\n
+        @param audio_data    wav array which will be segmented\n
+        @param segment_data  time stamps for audio segmentation
+        """
+        # tbd!
+        pass
+        
