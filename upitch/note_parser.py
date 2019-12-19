@@ -32,7 +32,9 @@ class NoteParser:
         return self.__singable
 
     def load_note_file(self, note_file):
-        """ load metadata and notelist into iterable objects for manipulation """
+        """ load metadata and notelist into iterable objects for manipulation\n
+        @param note_file USDX project file
+        """
         self.meta.clear()
         self.singable.clear()
         self.__file_buffer.clear()
@@ -62,13 +64,17 @@ class NoteParser:
                 self.singable.append({"t_start" : t_start, "t_end" : t_end, "pitch" : pitch})
 
     def update_pitches(self, new_pitches):
-        """ replace old singable pitches by newly calculated ones """
+        """ replace old singable pitches by newly calculated ones\n
+        @param new_pitches list of newly calculated pitches
+        """
         assert (len(new_pitches) == len(self.singable)), "pitches can't be updated, array size doesn't match!"
         for singable, new_pitch in zip(self.singable, new_pitches):
             singable["pitch"] = new_pitch
 
     def save_note_file(self, note_file):
-        """ save updated note file under a new name """
+        """ save updated note file under a new name\n
+        @param note_file location+name for updated USDX project file
+        """
         note_file = open(note_file, 'w+', encoding="utf-8")
         singable = iter(self.singable)
         # go through old file and update it when needed
