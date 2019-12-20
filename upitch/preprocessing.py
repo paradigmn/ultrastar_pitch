@@ -3,104 +3,82 @@
 
 """
 @file          preprocessing.py
-@brief         parse an USDX note file and the corresponding audio file
-               for further processing
+@brief         turn an audio block of arbitrary length into
+               a transformed output of unified length
 @author        paradigm
 """
 
-class NoteParser:
-    """ read an USDX note file and makes it content available """
-    def __init__(self):
-        # dictionary with metadata
-        self.__meta = {}
-        # list of dictionarys with singable notes
-        self.__singable = []
-        # buffer for note_file content
-        self.__file_buffer = []
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 
-    @property
-    def meta(self):
-        """ getter method for meta variable """
-        return self.__meta
+def zero_pad_array(array, new_size):
+    """ pads signal array with zeros to the desired size\n
+    @param array     signal data which has to be extended\n
+    @param new_size  desired new array size
+    """
+    return np.pad(array, (0, (new_size - len(array))), 'constant')
 
-    @property
-    def singable(self):
-        """ getter method for singable variable """
-        return self.__singable
+def apply_pca(features, pca_params):
+    """ uses principal component analysis to reduce variance and input features\n
+    @param features    feature array for decomposition\n
+    @param pca_params  parameter of a fitted pca decompositor\n
 
-    def load_note_file(self, note_file):
-        """ load metadata and notelist into iterable objects for manipulation\n
-        @param  note_file USDX project file
+    @note at this point I am uncertain if this method should be bound to a class or not
+    """
+    # tbd!
+    pass
+
+class AverageFourier:
+    """ calculate the averaged right half of the signals power spectrum and normalizes it\n
+    @param sample_rate  sampling frequency of the input data\n
+    @param fft_len      fft window length\n
+    @param adv_len      advance length for the averaging process\n
+    @param fg_l         lowest cutoff-freqency (shortens output array)\n
+    @param noise_th     reduce noise floor by setting magnitudes below this threshold to zero
+    """
+    def __init__(self, sample_rate=16000, fft_len=2048, adv_len=512, fg_l=0, noise_th=0.0):
+        err_str1 = "{0} has to be an positive integer value"
+        err_str2 = "{0} has to be an positive float value"
+        assert (isinstance(sample_rate, int) and sample_rate > 0), err_str1.format("sample_rate")
+        assert (isinstance(fft_len, int) and fft_len > 0), err_str1.format("fft_len")
+        assert (isinstance(adv_len, int) and adv_len > 0), err_str1.format("adv_len")
+        assert (isinstance(fg_l, int) and fg_l >= 0), err_str1.format("fg_l")
+        assert (isinstance(noise_th, float) and fg_l >= 0), err_str2.format("noise_th")
+        self.__adv_len = adv_len
+        self.__fft_len = fft_len
+        self.__noise_th = noise_th
+        # calculate the first sample based an the lowest cutoff-freqency
+        self.__sample_l = int(np.floor(fg_l * (fft_len / sample_rate)))
+        # calculate hanning window for short-term fourier transform
+        self.__fft_win = np.hanning(fft_len)
+
+    def transform_audio_segment(self, segment):
+        """ turn audio segment into an averaged fft\n
+        @param segment  an audio segment of arbitrary length
         """
-        self.meta.clear()
-        self.singable.clear()
-        self.__file_buffer.clear()
-        note_file = open(note_file, 'r', encoding="utf-8")
-        # buffer file for later reuse
-        self.__file_buffer = note_file.read().splitlines(True)
-        for line in self.__file_buffer:
-            # parse header
-            if line.startswith('#'):
-                # remove trailing whitespaces
-                line = line.rstrip('\r').rstrip('\n')
-                key, value = line.split(':', 1)
-                if key in ("#BPM", "#GAP"):
-                    self.meta[key] = float(value.replace(',', '.'))
-                else:
-                    self.meta[key] = value
-            # parse singable notes
-            elif line.startswith((':', '*')):
-                line = line.split(' ')
-                pitch = int(line[3]) % 12
-                # start = gap + start_beat * (1500 / bpm)
-                # I have no idea where the 15000 comes from, I found it manually by trial and error
-                t_start = self.meta["#GAP"] + float(line[1]) * (15000 / self.meta["#BPM"])
-                # end = gap + (start_beat + end_beat) * (1500 / bpm)
-                t_end = self.meta["#GAP"] + (float(line[1]) + float(line[2])) * (15000 / self.meta["#BPM"])
-                # append line data to singable list
-                self.singable.append({"t_start" : t_start, "t_end" : t_end, "pitch" : pitch})
+        avg_fft = 0
+        # I don't feel save mergin the divisions due to possible rounding errors
+        avg_steps = len(segment) // self.__adv_len - self.__fft_len // self.__adv_len + 2
+        for i in range(avg_steps):
+            # sliding indexes for fft window
+            idx_0 = i * self.__adv_len
+            idx_1 = self.__fft_len + idx_0
+            if i == avg_steps - 1:
+                # last frame needs to be zero padded
+                frame = zero_pad_array(segment[idx_0:] * np.hanning(len(segment) - idx_0), self.__fft_len)
+            else:
+                # multiply segment slice by window function to reduce artifacts
+                frame = segment[idx_0:idx_1] * self.__fft_win
+            # average fft and cut off low frequencies based on fg_l
+            avg_fft += abs(np.fft.rfft(frame))[self.__sample_l:]
+        # normalizing data for easier processing
+        avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
+        # reduce noise floor by static threshold level
+        avg_fft[avg_fft < self.__noise_th] = 0
+        return(avg_fft)
 
-    def update_pitches(self, new_pitches):
-        """ replace old singable pitches by newly calculated ones\n
-        @param  new_pitches list of newly calculated pitches
-        """
-        assert (len(new_pitches) == len(self.singable)), "pitches can't be updated, array size doesn't match!"
-        for singable, new_pitch in zip(self.singable, new_pitches):
-            singable["pitch"] = new_pitch
-
-    def save_note_file(self, note_file):
-        """ save updated note file under a new name\n
-        @param  note_file location+name for updated USDX project file
-        """
-        note_file = open(note_file, 'w+', encoding="utf-8")
-        singable = iter(self.singable)
-        # go through old file and update it when needed
-        for line in self.__file_buffer:
-            if line.startswith((':', '*')):
-                line = line.split(" ")
-                line[3] = str(int(next(singable)["pitch"]))
-                line = ' '.join(line)
-            note_file.write(line)
-
-class AudioProcessor:
-    """ convert and resample audio file before dividing it into audio segments """
+class AverageWavelet:
+    """ calculate averaged wavelet transform of the signal """
     def __init__(self):
         # tbd!
         pass
-
-    def load_audio(self, audio_file, sample_rate=16000):
-        """ convert audio file into a wav array with a given sample rate\n
-        @param audio_file   mp3 file which will be converted\n
-        @param sample_rate  sampling frequency for the conversion
-        """
-        # tbd!
-        pass
-
-    def segment_audio(self, audio_data, segment_data):
-        """ convert audio file into a wav array with a given sample rate\n
-        @param audio_data    wav array which will be segmented\n
-        @param segment_data  time stamps for audio segmentation
-        """
-        # tbd!
-        pass
-        
