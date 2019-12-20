@@ -68,7 +68,7 @@ class ProjectParser:
         @param  new_pitches list of newly calculated pitches
         """
         assert (len(new_pitches) == len(self.__singable)), \
-            "pitches can't be updated, array size doesn't match!"
+                "pitches can't be updated, array size doesn't match!"
         for singable, new_pitch in zip(self.__singable, new_pitches):
             singable["pitch"] = new_pitch
 
@@ -97,7 +97,7 @@ class ProjectParser:
         wav_path = os.path.join(self.__proj_dir, "tmp.wav")
         subprocess.run([self.__FFMPEG, '-i', audio_path, '-y',
                         '-ac', '1', '-ar', str(sample_rate), wav_path],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         # load wav into numpy array for processing and discard file
         _, samples_mono = wavfile.read(wav_path)
         os.remove(wav_path)

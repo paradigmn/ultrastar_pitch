@@ -65,7 +65,8 @@ class AverageFourier:
             idx_1 = self.__fft_len + idx_0
             if i == avg_steps - 1:
                 # last frame needs to be zero padded
-                frame = zero_pad_array(segment[idx_0:] * np.hanning(len(segment) - idx_0), self.__fft_len)
+                frame = zero_pad_array(segment[idx_0:] * np.hanning(len(segment) - idx_0),
+                                       self.__fft_len)
             else:
                 # multiply segment slice by window function to reduce artifacts
                 frame = segment[idx_0:idx_1] * self.__fft_win
@@ -75,7 +76,7 @@ class AverageFourier:
         avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
         # reduce noise floor by static threshold level
         avg_fft[avg_fft < self.__noise_th] = 0
-        return(avg_fft)
+        return avg_fft
 
 class AverageWavelet:
     """ calculate averaged wavelet transform of the signal """
