@@ -14,7 +14,8 @@ from sklearn.preprocessing import MinMaxScaler
 def zero_pad_array(array, new_size):
     """ pads signal array with zeros to the desired size\n
     @param array     signal data which has to be extended\n
-    @param new_size  desired new array size
+    @param new_size  desired new array size\n
+    @return  padded array
     """
     return np.pad(array, (0, (new_size - len(array))), 'constant')
 
@@ -54,7 +55,8 @@ class AverageFourier:
 
     def transform_audio_segment(self, segment):
         """ turn audio segment into an averaged fft\n
-        @param segment  an audio segment of arbitrary length
+        @param segment  an audio segment of arbitrary length\n
+        @return  averaged fft
         """
         avg_fft = 0
         # I don't feel save mergin the divisions due to possible rounding errors

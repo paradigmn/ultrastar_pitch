@@ -89,6 +89,7 @@ class ProjectParser:
     def process_audio(self, sample_rate=16000):
         """ convert and resample audio file before dividing it into audio segments\n
         @param sample_rate  sampling frequency for the conversion
+        @return  list of audio segments
         """
         err_str1 = "{0} has to be an positive integer value"
         assert (isinstance(sample_rate, int) and sample_rate > 0), err_str1.format("sample_rate")
