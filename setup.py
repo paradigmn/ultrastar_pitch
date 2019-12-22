@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.34',
+      version='0.40',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[
@@ -21,9 +21,11 @@ setup(name='ultrastar_pitch',
       url='https://github.com/paradigmn/ultrastar_pitch',
       author='paradigm',
       author_email='ultrastarpitch@gmail.com',
-      packages=['upitch'],
+      packages=['ultrastar_pitch'],
+      entry_points = {"console_scripts": ['ultrastar-pitch = ultrastar_pitch.ultrastar_pitch:main']},
       install_requires=['numpy',
                         'scipy',
+                        'scikit-learn',
                         'keras',
                         'tensorflow'],
       include_package_data=True,

@@ -6,6 +6,7 @@
 @brief         determine the pitch by analysing the provided data
 @author        paradigm
 """
+
 import numpy as np
 from keras.models import load_model
 
@@ -49,9 +50,9 @@ class NeuronalNetwork:
     def predict(self, features):
         """
         @param features  transformed data as input for a matching trained model\n
-        @return  best fitting pitch and rated likelihood
+        @return  best fitting pitch
         """
         features = np.squeeze(features)
         preds = self.__model.predict(np.array([features]))
         pitch = preds.argmax(axis=1)[0]
-        return pitch, preds[0][pitch]
+        return pitch
