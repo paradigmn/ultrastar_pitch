@@ -63,6 +63,12 @@ class ProjectParser:
                 # append line data to singable list
                 self.__singable.append({"t_start" : t_start, "t_end" : t_end, "pitch" : pitch})
 
+    def dump_pitches(self):
+        """ returns the singable pitches\n
+        @return  array of singable pitches
+        """
+        return [singable["pitch"] for singable in self.__singable]
+        
     def update_pitches(self, new_pitches):
         """ replace old singable pitches by newly calculated ones\n
         @param  new_pitches list of newly calculated pitches
