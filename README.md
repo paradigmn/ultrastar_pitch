@@ -76,6 +76,7 @@ v0.32 - added model to PyPi repo -> is now used by default
 v0.33 - using absolute paths instead of relative ones  
 v0.34 - bug fixes  
 v0.40 - complete restructuring and application works as command line application  
+v0.41 - fixed behavior for some edge cases  
   
 ### todo
 * reduce input features and variance by applying PCA  

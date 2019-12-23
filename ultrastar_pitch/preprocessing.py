@@ -59,8 +59,11 @@ class AverageFourier:
         @return  averaged fft
         """
         avg_fft = 0
-        # I don't feel save mergin the divisions due to possible rounding errors
-        avg_steps = len(segment) // self.__adv_len - self.__fft_len // self.__adv_len + 2
+        if len(segment) < self.__fft_len:
+            avg_steps = 1
+        else:
+            # I don't feel save mergin the divisions due to possible rounding errors
+            avg_steps = len(segment) // self.__adv_len - self.__fft_len // self.__adv_len + 2
         for i in range(avg_steps):
             # sliding indexes for fft window
             idx_0 = i * self.__adv_len

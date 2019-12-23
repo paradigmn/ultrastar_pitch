@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.40',
+      version='0.41',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[

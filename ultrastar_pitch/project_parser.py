@@ -42,7 +42,7 @@ class ProjectParser:
         self.__file_buffer = note_file.read().splitlines(True)
         for line in self.__file_buffer:
             # parse header
-            if line.startswith('#'):
+            if line.startswith('#') and not self.__singable:
                 # remove trailing whitespaces
                 line = line.rstrip('\r').rstrip('\n')
                 key, value = line.split(':', 1)
