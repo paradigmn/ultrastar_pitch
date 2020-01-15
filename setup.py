@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.41',
+      version='0.411',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[
@@ -27,7 +27,7 @@ setup(name='ultrastar_pitch',
                         'scipy',
                         'scikit-learn',
                         'keras',
-                        'tensorflow'],
+                        'tensorflow==1.14.0'],
       include_package_data=True,
       zip_safe=False)
 
