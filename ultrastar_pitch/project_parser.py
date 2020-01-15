@@ -28,7 +28,17 @@ class ProjectParser:
             self.__FFMPEG = os.path.join(sys._MEIPASS, 'ffmpeg.exe')
         else:
             self.__FFMPEG = 'ffmpeg'
-
+            
+    @property
+    def meta(self):
+        """ getter for metadata """
+        return self.__meta
+    
+    @meta.setter
+    def meta(self, meta):
+        """ setter for metadata """
+        self.__meta = meta
+        
     def load_note_file(self, note_file):
         """ load metadata and notelist into iterable objects for manipulation\n
         @param  note_file USDX project file
