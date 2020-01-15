@@ -34,7 +34,7 @@ class AverageFourier:
     @param sample_rate  sampling frequency of the input data\n
     @param fft_len      fft window length\n
     @param adv_len      advance length for the averaging process\n
-    @param fg_l         lowest cutoff-freqency (shortens output array)\n
+    @param fg_l         lowest cutoff-freqency set lower frequencies to zero\n
     @param noise_th     reduce noise floor by setting magnitudes below this threshold to zero
     """
     def __init__(self, sample_rate=16000, fft_len=2048, adv_len=512, fg_l=0, noise_th=0.0):
@@ -76,7 +76,9 @@ class AverageFourier:
                 # multiply segment slice by window function to reduce artifacts
                 frame = segment[idx_0:idx_1] * self.__fft_win
             # average fft and cut off low frequencies based on fg_l
-            avg_fft += abs(np.fft.rfft(frame))[self.__sample_l:]
+            avg_fft += abs(np.fft.rfft(frame))
+        # set frequencies lower fg_l to zero
+        avg_fft[:self.__sample_l] = 0
         # normalizing data for easier processing
         avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
         # reduce noise floor by static threshold level
