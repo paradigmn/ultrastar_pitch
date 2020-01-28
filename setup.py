@@ -27,7 +27,7 @@ setup(name='ultrastar_pitch',
                         'scipy',
                         'scikit-learn',
                         'keras',
-                        'tensorflow==1.15.0'],
+                        'tensorflow==1.15.2'],
       include_package_data=True,
       zip_safe=False)
 
