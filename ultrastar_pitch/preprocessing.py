@@ -9,7 +9,6 @@
 """
 
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 
 def zero_pad_array(array, new_size):
     """ pads signal array with zeros to the desired size\n
@@ -19,15 +18,24 @@ def zero_pad_array(array, new_size):
     """
     return np.pad(array, (0, (new_size - len(array))), 'constant')
 
-def apply_pca(features, pca_params):
-    """ uses principal component analysis to reduce variance and input features\n
-    @param features    feature array for decomposition\n
-    @param pca_params  parameter of a fitted pca decompositor\n
-
-    @note at this point I am uncertain if this method should be bound to a class or not
+class PCA:
+    """ uses principal component analysis to reduce input features and increase variance\n
+    @param pca_mean        mean value vector fom a pca model\n
+    @param pca_components  component matrix fom a pca model\n
+    @note  the parameter can be gained by training a sklearn pca model and retrieving
+           the "mean_" and "components_" member variable from the model
+           this approach was choosen to avoid a dependency on the sklearn and pickle packages
     """
-    # tbd!
-    pass
+    def __init__(self, pca_mean, pca_components):
+        self.__mean = pca_mean
+        self.__comp = pca_components
+
+    def transform(self, features):
+        """ apply pca by means of matrix calculation\n
+        @param   features  input data for pca
+        @return  reduced feature set
+        """
+        return np.dot((features - self.__mean), self.__comp.T)
 
 class AverageFourier:
     """ calculate the averaged right half of the signals power spectrum and normalizes it\n
@@ -79,8 +87,11 @@ class AverageFourier:
             avg_fft += abs(np.fft.rfft(frame))
         # set frequencies lower fg_l to zero
         avg_fft[:self.__sample_l] = 0
-        # normalizing data for easier processing
-        avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
+        # scaling the data between 0 and 1. ptp() could introduce a dividing by zero exception, if avg_fft is a zero array
+        # in this case somethink else went wrong beforehand!
+        # old approach: avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
+        avg_fft -= avg_fft.min()
+        avg_fft /= avg_fft.ptp()
         # reduce noise floor by static threshold level
         avg_fft[avg_fft < self.__noise_th] = 0
         return avg_fft
