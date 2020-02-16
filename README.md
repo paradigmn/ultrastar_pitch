@@ -31,7 +31,7 @@ Open a terminal and type:
 `pip install ultrastar-pitch`  
   
 Pip should install all dependencies automatically, if not run  
-`pip install scipy numpy scikit-learn keras tensorflow`  
+`pip install scipy numpy tensorflow`  
   
 ## developer information
 ### build instructions (windows only)
@@ -43,14 +43,11 @@ tbd.
 ### implementation
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed and averaged. The output is fed into a neuronal network to determine the pitch.  
   
-The deep learning model was trained by a large karaoke database. It uses an averaged, absolute, right half fft of 2048 samples length (1025 features). The training data was filtered beforehand by checking the label against a sliding harmonic classifier.  
-The model structure can be derived from its name. E.g: "keras\_tf\_1025\_240\_120\_12\_fft\_0.model" stands for a Keras model, 
-which uses the Tensorflow backend. It takes 1025 input values, has two hidden layers with 240 and 120 nodes and 12 outputs. Furthermore the input was fft transformed and the model revision is 0.  
+The deep learning model was trained by a large karaoke database.
+The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_astft\_pca\_0.model" stands for a tensorflow 2 model, which takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was averaged short time fourier transformed and decomposed with PCA. The model revision is 0.  
   
 ### accuracy
 The precision of this method changes greatly with the analyzed audio. For example a ballad with slow background music and a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.  
-  
-The average accuracy of the current approach is roughly 75%.  
   
 To get a  better impression, you can use the "-a" flag on a song which was already translated:  
 `ultrastar-pitch -a`  
@@ -77,10 +74,10 @@ v0.33 - using absolute paths instead of relative ones
 v0.34 - bug fixes  
 v0.40 - complete restructuring and application works as command line application  
 v0.41 - fixed behavior for some edge cases  
+v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accuracy and speed  
   
 ### todo
-* reduce input features and variance by applying PCA  
-* consider different machine learning techniques (Trees, Regression, SVM, Ensemble, ...)  
+* change from averaged fft to block median classification  
 * improve exception handling  
 * change from fft algorithm to wavelet transformation to get a better overall frequency resolution  
 * implement GUI for easier access  
