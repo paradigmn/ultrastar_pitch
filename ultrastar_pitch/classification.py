@@ -8,7 +8,7 @@
 """
 
 import numpy as np
-from keras.models import load_model
+import tensorflow as tf
 
 class SlidingHarmonic:
     """ calculate the pitch based on the sum of basetone, first and second harmonic\n
@@ -45,7 +45,7 @@ class NeuronalNetwork:
     @param model  deep learning model\n
     """
     def __init__(self, model):
-        self.__model = load_model(model)
+        self.__model = tf.saved_model.load(model)
 
     def predict(self, features):
         """
