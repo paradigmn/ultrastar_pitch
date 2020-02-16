@@ -82,7 +82,7 @@ def main():
     # load and parse project file
     notes.load_note_file(proj_file)
     pitches_old = notes.dump_pitches()
-    pitches_new = []
+    feature_list = []
     # divide audio into pitch segments
     audio_segments = notes.process_audio()
     # analyse each segment
@@ -92,9 +92,9 @@ def main():
         # perform average fft on the segment
         astft = trafo.transform_audio_segment(segment_emph)
         # use pca to reduce feature space
-        features = decomp.transform(astft)
-        # predict pitch based on the choosen classifier
-        pitches_new.append(clf.predict(features))
+        feature_list.append(decomp.transform(astft))
+    # predict new pitches in batches 
+    pitches_new = clf.predict_batch(feature_list)
     notes.update_pitches(pitches_new)
     notes.save_note_file(dest_file)
 

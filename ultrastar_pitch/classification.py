@@ -56,3 +56,11 @@ class NeuronalNetwork:
         preds = self.__model.predict(np.array([features]))
         pitch = preds.argmax(axis=1)[0]
         return pitch
+    
+    def predict_batch(self, feature_list):
+        """
+        @param feature_list  list of features to classify\n
+        @return  best fitting pitch list
+        """
+        predictions = self.__model.predict(np.array(feature_list), batch_size=32)
+        return [pred.argmax() for pred in predictions]
