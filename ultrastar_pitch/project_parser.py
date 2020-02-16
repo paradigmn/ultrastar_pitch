@@ -64,10 +64,10 @@ class ProjectParser:
             elif line.startswith((':', '*')):
                 line = line.split(' ')
                 pitch = int(line[3]) % 12
-                # start = gap + start_beat * (1500 / bpm)
-                # I have no idea where the 15000 comes from, I found it manually by trial and error
+                # start = gap + start_beat * (15000 / bpm)
+                # the 15000 indicates an 1/16 note, while a beat is usually a 1/4 note
                 t_start = self.__meta["#GAP"] + float(line[1]) * (15000 / self.__meta["#BPM"])
-                # end = gap + (start_beat + end_beat) * (1500 / bpm)
+                # end = gap + (start_beat + end_beat) * (15000 / bpm)
                 t_end = self.__meta["#GAP"] + (float(line[1]) + \
                                                float(line[2])) * (15000 / self.__meta["#BPM"])
                 # append line data to singable list
