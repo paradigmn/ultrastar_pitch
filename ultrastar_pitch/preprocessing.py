@@ -27,8 +27,8 @@ class PCA:
            this approach was choosen to avoid a dependency on the sklearn and pickle packages
     """
     def __init__(self, pca_mean, pca_components):
-        self.__mean = pca_mean
-        self.__comp = pca_components
+        self.__mean = np.load(pca_mean)
+        self.__comp = np.load(pca_components)
 
     def transform(self, features):
         """ apply pca by means of matrix calculation\n

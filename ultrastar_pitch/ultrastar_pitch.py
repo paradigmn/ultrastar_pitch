@@ -14,9 +14,12 @@ import numpy as np
 
 from .project_parser import ProjectParser
 from .preprocessing import AverageFourier
+from .preprocessing import PCA
 from .classification import NeuronalNetwork
 
-default_model = "keras_tf_1025_240_120_12_fft_0.model"
+tf_model = "tf2_256_96_12_astft_pca_1.model"
+pca_comp = "pca_components.npy"
+pca_mean = "pca_mean.npy"
 
 # define flags
 parser = argparse.ArgumentParser(usage="%(prog)s [options] [args]")
@@ -64,11 +67,17 @@ def main():
     # init pitch classifier
     if getattr(sys, 'frozen', False):
         # use meipass in case of binary execution
-        model = os.path.join(sys._MEIPASS, default_model)
+        model = os.path.join(sys._MEIPASS, tf_model)
+        comp = os.path.join(sys._MEIPASS, pca_comp)
+        mean = os.path.join(sys._MEIPASS, pca_mean)
     else:
-        model_path = os.path.join(os.path.dirname(__file__), "models")
-        model = os.path.join(model_path, default_model)
+        bin_path = os.path.join(os.path.dirname(__file__), "binaries")
+        model = os.path.join(bin_path, tf_model)
+        comp = os.path.join(bin_path, pca_comp)
+        mean = os.path.join(bin_path, pca_mean)
     clf = NeuronalNetwork(model)
+    # init pca decomposer
+    decomp = PCA(mean, comp)
 
     # load and parse project file
     notes.load_note_file(proj_file)
@@ -78,8 +87,12 @@ def main():
     audio_segments = notes.process_audio()
     # analyse each segment
     for segment in audio_segments:
-        # transform segment into features for prediction
-        features = trafo.transform_audio_segment(segment)
+        # emphasize audio segment
+        segment_emph = np.append(segment[0], segment[1:] - 0.97 * segment[:-1])
+        # perform average fft on the segment
+        astft = trafo.transform_audio_segment(segment_emph)
+        # use pca to reduce feature space
+        features = decomp.transform(astft)
         # predict pitch based on the choosen classifier
         pitches_new.append(clf.predict(features))
     notes.update_pitches(pitches_new)

@@ -45,7 +45,7 @@ class NeuronalNetwork:
     @param model  deep learning model\n
     """
     def __init__(self, model):
-        self.__model = tf.saved_model.load(model)
+        self.__model = tf.keras.models.load_model(model)
 
     def predict(self, features):
         """

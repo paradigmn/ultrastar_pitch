@@ -1,2 +1,5 @@
 include README.rst
-include ultrastar_pitch/models/keras_tf_1025_240_120_12_fft_0.model
+recursive-include ultrastar_pitch/binaries/tf2_256_96_12_astft_pca_0.model *
+recursive-include ultrastar_pitch/binaries/tf2_256_96_12_astft_pca_1.model *
+include ultrastar_pitch/binaries/pca_components.npy
+include ultrastar_pitch/binaries/pca_mean.npy
