@@ -5,7 +5,7 @@ This python application is an attempt to automate the pitch detection for USDX p
 Since version 0.40 the project is a standalone terminal application. After the installation it can simply be executed in the shell via:  
 `ultrastar-pitch`  
   
-If the usdx file is named "notes.txt", no arguments are neccessary. If it is named any different it has to be explicitly stated:  
+If the usdx file is named "notes.txt", no arguments are necessary. If it is named any different it has to be explicitly stated:  
 `ultrastar-pitch name.txt`  
 If everything went well a new file "notes_new.txt" should appear. In case a different output name is desired it can be changed with the "-o" flag:  
 `ultrastar-pitch -o name_new.txt`  
@@ -13,7 +13,7 @@ If everything went well a new file "notes_new.txt" should appear. In case a diff
 For Windows x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37) available. Just place it in your project folder with a "note.txt" and "song.mp3" file and execute it.  
   
 Note: Some virus scanner identify the binary as Bitcoin miner and therefore prevent the execution. This is unfortunate but not in my power to
-control. Either add an exception or install the python application as descriped below.  
+control. Either add an exception or install the python application as described below.  
   
 ## installation
 If you are using the binary, everything should run out of the box.  
@@ -30,8 +30,7 @@ Open a terminal and type:
 `sudo apt-get install python3 python3-pip ffmpeg`  
 `pip install ultrastar-pitch`  
   
-Pip should install all dependencies automatically, if not run  
-`pip install scipy numpy tensorflow`  
+Any instance of tensorflow < 2.0 should be removed before installing the software.
   
 ## developer information
 ### build instructions (windows only)
@@ -78,6 +77,8 @@ v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accur
   
 ### todo
 * change from averaged fft to block median classification  
+* define labeling functions to sort out mislabeled data  
+* use statistical distribution and markov chains to evaluate the prediction  
 * improve exception handling  
 * change from fft algorithm to wavelet transformation to get a better overall frequency resolution  
 * implement GUI for easier access  
