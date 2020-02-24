@@ -34,11 +34,13 @@ Any instance of tensorflow < 2.0 should be removed before installing the softwar
   
 ## developer information
 ### build instructions (windows only)
-The software can be compiled into a single standalone binary. To achieve this, additional requirements need to be installed.  
-`pip install pyinstaller pywin32 setuptools pypiwin32`  
+The software can be compiled into a single standalone binary. To achieve this an additional packet needs to be installed.  
+`pip install pyinstaller`  
   
-tbd.  
+To include ffmpeg into the binary, it needs to be placed as specified by the setup.spec file. The default would be "ffmpeg\bin\ffmpeg.exe" within the project root.  
   
+The building process is fairly easy. Just execute the following command within the cmd/powershell:  
+`pyinstaller setup.spec`  
 ### implementation
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed and averaged. The output is fed into a neuronal network to determine the pitch.  
   
