@@ -95,6 +95,32 @@ class AverageFourier:
         # reduce noise floor by static threshold level
         avg_fft[avg_fft < self.__noise_th] = 0
         return avg_fft
+    
+    def calc_spectrals(self, segment):
+        """ turn an audio segment into a list of spectras\n
+        @param  segment  an audio segment of arbitrary length\n
+        @return fft list
+        """
+        spectrals = []
+        if len(segment) < self.__fft_len:
+            steps = 1
+        else:
+            # I don't feel save mergin the divisions due to possible rounding errors
+            steps = len(segment) // self.__adv_len - self.__fft_len // self.__adv_len + 2
+        for i in range(steps):
+            # sliding indexes for fft window
+            idx_0 = i * self.__adv_len
+            idx_1 = self.__fft_len + idx_0
+            if i != steps - 1:
+                # multiply frame by window function to reduce artifacts
+                frame = segment[idx_0:idx_1] * self.__fft_win
+            else:
+                # last frame is smaller therefore a smaller window is required
+                frame = segment[idx_0:] * np.hanning(len(segment) - idx_0)
+            # calculate spectrum, remove low frequencies and add it to spectral list
+            spectrals.append(abs(np.fft.rfft(frame, n=self.__fft_len, norm="ortho"))[:self.__sample_l])
+        return spectrals
+        
 
 class AverageWavelet:
     """ calculate averaged wavelet transform of the signal """
