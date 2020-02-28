@@ -4,6 +4,7 @@
 """
 @file          generate_training.py
 @brief         read in audio segments and generates training data from them
+               !!! old script for ultrastar-pitch 0.5, will be kept for reference !!!
 @author        paradigm
 """
 
@@ -48,7 +49,7 @@ def main():
         os.makedirs(pitch_dir, exist_ok=True)
 
     # remove old data if desired
-    # lear_training_data()
+    # clear_training_data()
 
     # parse folder for usable files
     for input_dir in INPUT_DIRS:
@@ -63,16 +64,16 @@ def main():
         # extract pitch from folder name
         pitch = int(os.path.basename(os.path.dirname(segment_path)))
         segment = np.load(segment_path)
-        # turn audio segment into a list of short time ffts
-        spectrals = trafo.full_spectrum(segment)
-        # save every fft for model training
-        for fft in spectrals:
-            # set label location for fft
-            feature_path = os.path.join(OUTPUT_DIR, str(pitch).zfill(2), str(file_counter))
-            # do not overwrite already existing data
-            if not os.path.exists(feature_path + ".npy"):
-                np.save(feature_path, fft)
-            file_counter += 1
+        # emphasize audio segment (will be dropped due to lack of benefit)
+        segment_emph = np.append(segment[0], segment[1:] - 0.97 * segment[:-1])
+        # transform segment into features for prediction
+        features = trafo.average_fft(segment_emph)
+        # set label location for features
+        feature_path = os.path.join(OUTPUT_DIR, str(pitch).zfill(2), str(file_counter))
+        # do not overwrite already existing data
+        if not os.path.exists(feature_path + ".npy"):
+            np.save(feature_path, features)
+        file_counter += 1
     print("finished!\n")
 
 
