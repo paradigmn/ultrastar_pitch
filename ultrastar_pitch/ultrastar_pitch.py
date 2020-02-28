@@ -13,7 +13,7 @@ import argparse
 import numpy as np
 
 from .project_parser import ProjectParser
-from .preprocessing import AverageFourier
+from .preprocessing import Fourier
 from .preprocessing import PCA
 from .classification import NeuronalNetwork
 
@@ -63,7 +63,7 @@ def main():
     # init project parser
     notes = ProjectParser()
     # init data preprocessor
-    trafo = AverageFourier()
+    trafo = Fourier()
     # init pitch classifier
     if getattr(sys, 'frozen', False):
         # use meipass in case of binary execution
@@ -82,19 +82,18 @@ def main():
     # load and parse project file
     notes.load_note_file(proj_file)
     pitches_old = notes.dump_pitches()
-    feature_list = []
+    pitches_new = []
     # divide audio into pitch segments
     audio_segments = notes.process_audio()
     # analyse each segment
     for segment in audio_segments:
-        # emphasize audio segment
-        segment_emph = np.append(segment[0], segment[1:] - 0.97 * segment[:-1])
-        # perform average fft on the segment
-        astft = trafo.transform_audio_segment(segment_emph)
+        # turn audio segment into a list of short time ffts
+        spectrals = trafo.full_spectrum(segment)
         # use pca to reduce feature space
-        feature_list.append(decomp.transform(astft))
-    # predict new pitches in batches 
-    pitches_new = clf.predict_batch(feature_list)
+        features = decomp.transform(spectrals)
+        # predict segments median pitch
+        pitches_new.append(int(np.median(clf.predict_batch(features), overwrite_input=True)))
+    # predict new pitches in batches
     notes.update_pitches(pitches_new)
     notes.save_note_file(dest_file)
 
