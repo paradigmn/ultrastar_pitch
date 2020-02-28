@@ -36,7 +36,7 @@ class Fourier:
     @param adv_len      advance length for the averaging process\n
     @param fg_l         lowest cutoff-freqency set lower frequencies to zero\n
     """
-    def __init__(self, sample_rate=16000, fft_len=2048, adv_len=512, fg_l=80):
+    def __init__(self, sample_rate=16000, fft_len=2048, adv_len=1024, fg_l=80):
         err_str1 = "{0} has to be an positive integer value"
         assert (isinstance(sample_rate, int) and sample_rate > 0), err_str1.format("sample_rate")
         assert (isinstance(fft_len, int) and fft_len > 0), err_str1.format("fft_len")
