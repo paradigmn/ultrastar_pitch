@@ -17,7 +17,7 @@ from .preprocessing import Fourier
 from .preprocessing import PCA
 from .classification import NeuronalNetwork
 
-tf_model = "tf2_256_96_12_astft_pca_1.model"
+tf_model = "tf2_256_96_12_astft_pca.model"
 pca_comp = "pca_components.npy"
 pca_mean = "pca_mean.npy"
 
@@ -63,7 +63,7 @@ def main():
     # init project parser
     notes = ProjectParser()
     # init data preprocessor
-    trafo = Fourier()
+    trafo = Fourier(adv_len=256)
     # init pitch classifier
     if getattr(sys, 'frozen', False):
         # use meipass in case of binary execution
