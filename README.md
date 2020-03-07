@@ -45,7 +45,7 @@ The building process is fairly easy. Just execute the following command within t
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed and averaged. The output is fed into a neuronal network to determine the pitch.  
   
 The deep learning model was trained by a large karaoke database.
-The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_astft\_pca\_0.model" stands for a tensorflow 2 model, which takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was averaged short time fourier transformed and decomposed with PCA. The model revision is 0.  
+The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_stft\_pca\_median.model" stands for a tensorflow 2 model, which takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was short time fourier transformed and decomposed with PCA. The pitch was determined by calculating the median of the block pitches.  
   
 ### accuracy
 The precision of this method changes greatly with the analyzed audio. For example a ballad with slow background music and a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.  
@@ -76,9 +76,9 @@ v0.34 - bug fixes
 v0.40 - complete restructuring and application works as command line application  
 v0.41 - fixed behavior for some edge cases  
 v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accuracy and speed  
+v0.60 - switching from average to median pitch evaluation, changed license  
   
 ### todo
-* change from averaged fft to block median classification  
 * define labeling functions to sort out mislabeled data  
 * use statistical distribution and markov chains to evaluate the prediction  
 * improve exception handling  
