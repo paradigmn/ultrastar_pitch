@@ -79,6 +79,8 @@ class Fourier:
             # old approach: avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))            
             stft -= stft.min()
             stft /= stft.ptp()
+            if np.isnan(stft).any():
+                raise ValueError("incorrect input introduced nan values!")
             spectrum.append(stft)
         return np.array(spectrum)
     
