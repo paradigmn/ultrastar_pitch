@@ -36,8 +36,7 @@ def prediction_score(y_true, y_pred):
     @param y_true  original pitches (human labeld)
     @param y_pred  predicted pitches
     """
-    correct = len(y_true[y_true == y_pred])
-    print(str(correct / len(y_true) * 100) + "% accuracy\n")
+    print(str(np.mean(np.array(y_true) == np.array(y_pred)) * 100) + "% accuracy\n")
     labels=["C_", "C#", "D_", "D#", "E_", "F_", "F#", "G_", "G#", "A_", "A#", "B_"]
     # calculate confusion matrix
     c_mat = np.zeros((len(labels),len(labels)))
@@ -63,7 +62,7 @@ def main():
     # init project parser
     notes = ProjectParser()
     # init data preprocessor
-    trafo = Fourier(adv_len=512)
+    trafo = Fourier(adv_len=128)
     # init pitch classifier
     if getattr(sys, 'frozen', False):
         # use meipass in case of binary execution
@@ -84,16 +83,27 @@ def main():
     pitches_old = notes.dump_pitches()
     pitches_new = []
     # divide audio into pitch segments
-    audio_segments = notes.process_audio()
-    # analyse each segment
+    audio_segments = notes.process_audio()  
+    # number of blocks per segment
+    len_arr = []
+    # all singable block features of the song
+    features = np.empty((0,256)) 
     for segment in audio_segments:
-        # turn audio segment into a list of short time ffts
+        # get block ffts for the segment
         spectrals = trafo.full_spectrum(segment)
-        # use pca to reduce feature space
-        features = decomp.transform(spectrals)
-        # predict segments median pitch
-        pitches_new.append(int(np.median(clf.predict_batch(features), overwrite_input=True)))
-    # predict new pitches in batches
+        # save number of blocks
+        len_arr.append(len(spectrals))
+        # append segment features to song features
+        features = np.concatenate((features, decomp.transform(spectrals)))
+    # predict all block features at once (increases performance a lot!)
+    pitches_all = clf.predict_batch(features) 
+    # calculate the segment indexes from length array
+    idx_0 = 0
+    for lenght in len_arr:
+        idx_1 = idx_0 + lenght
+        # determine the median pitch of the segment
+        pitches_new.append(int(np.median(pitches_all[idx_0:idx_1])))
+        idx_0 = idx_1    
     notes.update_pitches(pitches_new)
     notes.save_note_file(dest_file)
 
