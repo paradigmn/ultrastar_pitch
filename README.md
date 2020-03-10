@@ -77,6 +77,7 @@ v0.40 - complete restructuring and application works as command line application
 v0.41 - fixed behavior for some edge cases  
 v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accuracy and speed  
 v0.60 - switching from average to median pitch evaluation, changed license  
+v0.6x - improved model accuracy and prediction speed  
   
 ### todo
 * define labeling functions to sort out mislabeled data  
