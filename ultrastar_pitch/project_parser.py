@@ -9,8 +9,9 @@
 """
 import os
 import sys
+import wave
 import subprocess
-from scipy.io import wavfile
+import numpy as np
 
 class ProjectParser:
     """ parse an USDX note file and the corresponding audio file  """
@@ -116,7 +117,9 @@ class ProjectParser:
                         '-ac', '1', '-ar', str(sample_rate), wav_path],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         # load wav into numpy array for processing and discard file
-        _, samples_mono = wavfile.read(wav_path)
+        wav_file = wave.open(wav_path)
+        samples_mono = np.frombuffer(wav_file.readframes(wav_file.getnframes()), dtype="int16")
+        wav_file.close()
         os.remove(wav_path)
         audio_segments = []
         for segment in self.__singable:

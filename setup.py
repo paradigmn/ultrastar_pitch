@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.63',
+      version='0.64',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[
@@ -24,7 +24,6 @@ setup(name='ultrastar_pitch',
       packages=['ultrastar_pitch'],
       entry_points = {"console_scripts": ['ultrastar-pitch = ultrastar_pitch.ultrastar_pitch:main']},
       install_requires=['numpy',
-                        'scipy',
                         'tensorflow>=2.0'],
       include_package_data=True,
       zip_safe=False)
