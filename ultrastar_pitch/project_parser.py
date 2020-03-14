@@ -16,6 +16,7 @@ import numpy as np
 class ProjectParser:
     """ parse an USDX note file and the corresponding audio file  """
     def __init__(self):
+        """ load class variables """
         # dictionary with metadata
         self.__meta = {}
         # list of dictionarys with singable notes
@@ -29,20 +30,20 @@ class ProjectParser:
             self.__FFMPEG = os.path.join(sys._MEIPASS, 'ffmpeg.exe')
         else:
             self.__FFMPEG = 'ffmpeg'
-            
+
     @property
     def meta(self):
         """ getter for metadata """
         return self.__meta
-    
+
     @meta.setter
     def meta(self, meta):
         """ setter for metadata """
         self.__meta = meta
-        
+
     def load_note_file(self, note_file):
         """ load metadata and notelist into iterable objects for manipulation\n
-        @param  note_file USDX project file
+        @param   note_file   USDX project file
         """
         self.__meta.clear()
         self.__singable.clear()
@@ -76,13 +77,13 @@ class ProjectParser:
 
     def dump_pitches(self):
         """ returns the singable pitches\n
-        @return  array of singable pitches
+        @return   array of singable pitches
         """
         return [singable["pitch"] for singable in self.__singable]
-        
+
     def update_pitches(self, new_pitches):
         """ replace old singable pitches by newly calculated ones\n
-        @param  new_pitches list of newly calculated pitches
+        @param   new_pitches   list of newly calculated pitches
         """
         assert (len(new_pitches) == len(self.__singable)), \
                 "pitches can't be updated, array size doesn't match!"
@@ -91,7 +92,7 @@ class ProjectParser:
 
     def save_note_file(self, note_file):
         """ save updated note file under a new name\n
-        @param  note_file location+name for updated USDX project file
+        @param   note_file   path for updated USDX project file
         """
         note_file = open(note_file, 'w+', encoding="utf-8")
         singable = iter(self.__singable)
@@ -106,7 +107,7 @@ class ProjectParser:
     def process_audio(self, sample_rate=16000):
         """ convert and resample audio file before dividing it into audio segments\n
         @param sample_rate  sampling frequency for the conversion
-        @return  list of audio segments
+        @return   list of audio segments
         """
         err_str1 = "{0} has to be an positive integer value"
         assert (isinstance(sample_rate, int) and sample_rate > 0), err_str1.format("sample_rate")

@@ -7,8 +7,6 @@
 @author        paradigm
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 
@@ -16,10 +14,6 @@ from .project_parser import ProjectParser
 from .preprocessing import Fourier
 from .preprocessing import PCA
 from .classification import NeuronalNetwork
-
-tf_model = "tf2_256_96_12_stft_pca_median.model"
-pca_comp = "pca_components.npy"
-pca_mean = "pca_mean.npy"
 
 # define flags
 parser = argparse.ArgumentParser(usage="%(prog)s [options] [args]")
@@ -64,19 +58,9 @@ def main():
     # init data preprocessor
     trafo = Fourier(adv_len=128)
     # init pitch classifier
-    if getattr(sys, 'frozen', False):
-        # use meipass in case of binary execution
-        model = os.path.join(sys._MEIPASS, tf_model)
-        comp = os.path.join(sys._MEIPASS, pca_comp)
-        mean = os.path.join(sys._MEIPASS, pca_mean)
-    else:
-        bin_path = os.path.join(os.path.dirname(__file__), "binaries")
-        model = os.path.join(bin_path, tf_model)
-        comp = os.path.join(bin_path, pca_comp)
-        mean = os.path.join(bin_path, pca_mean)
-    clf = NeuronalNetwork(model)
+    clf = NeuronalNetwork()
     # init pca decomposer
-    decomp = PCA(mean, comp)
+    decomp = PCA()
 
     # load and parse project file
     notes.load_note_file(proj_file)
