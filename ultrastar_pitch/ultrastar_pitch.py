@@ -87,7 +87,7 @@ def main():
         idx_1 = idx_0 + lenght
         # determine the median pitch of the segment
         pitches_new.append(int(np.median(pitches_all[idx_0:idx_1])))
-        idx_0 = idx_1    
+        idx_0 = idx_1
     notes.update_pitches(pitches_new)
     notes.save_note_file(dest_file)
 
