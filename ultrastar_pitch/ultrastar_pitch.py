@@ -14,6 +14,7 @@ from .project_parser import ProjectParser
 from .preprocessing import Fourier
 from .preprocessing import PCA
 from .classification import NeuronalNetwork
+from .postprocessing import Markov
 
 # define flags
 parser = argparse.ArgumentParser(usage="%(prog)s [options] [args]")
@@ -23,7 +24,13 @@ parser.add_argument("-o", "--output", default="notes_new.txt",
                     help="name of project output file (default=notes_new.txt)")
 parser.add_argument("-a", "--accuracy", action='store_true',
                     help="output the prediction accuracy (for debugging)")
+parser.add_argument("-m", "--no-postproc", action='store_true',
+                    help="disable statistical postprocessing")
 args = parser.parse_args()
+
+# convert between numerical and alphabetic pitch notation
+PITCH_MAP = {0 : "C_", 1 : "C#", 2 : "D_", 3 : "D#", 4 : "E_", 5 : "F_",
+             6 : "F#", 7 : "G_", 8 : "G#", 9 : "A_", 10 : "A#", 11 : "B_"}
 
 def prediction_score(y_true, y_pred):
     """ evaluate the prediction by showing accuracy and confusion matrix 
@@ -61,6 +68,8 @@ def main():
     clf = NeuronalNetwork()
     # init pca decomposer
     decomp = PCA()
+    # init postprocessor
+    postproc = Markov()
 
     # load and parse project file
     notes.load_note_file(proj_file)
@@ -88,8 +97,14 @@ def main():
         # determine the median pitch of the segment
         pitches_new.append(int(np.median(pitches_all[idx_0:idx_1])))
         idx_0 = idx_1
-    notes.update_pitches(pitches_new)
-    notes.save_note_file(dest_file)
+
+    if not args.no_postproc:
+        key = postproc.detect_key(pitches_new)
+        print("Song was written in: " + PITCH_MAP[key])
+        pitches_new = postproc.correct_pitches(key, pitches_new)
 
     if args.accuracy:
         prediction_score(np.array(pitches_old), np.array(pitches_new))
+        
+    notes.update_pitches(pitches_new)
+    notes.save_note_file(dest_file)
