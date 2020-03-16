@@ -60,6 +60,7 @@ The software is based on three modules:
 * project_parser.py (parse the project for singable notes and yield audio segments)  
 * preprocessing.py (transform segments into features of uniform size)  
 * classification.py (predict pitch based on the provided pitches)  
+* postprocessing.py (use statistics to optimize the detected pitches)  
   
 Each modules contains one or more classes to provide the needed functionality. To make use of them in your own project just import them like this:  
 `from ultrastar_pitch.module import class`  
@@ -79,10 +80,9 @@ v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accur
 v0.60 - switching from average to median pitch evaluation, changed license  
 v0.6x - improved model accuracy and prediction speed  
 v0.64 - switched from scipy.io to wave library to load audio  
+v0.70 - use statistical distribution to improve the prediction  
   
 ### todo
-* define labeling functions to sort out mislabeled data  
-* use statistical distribution and markov chains to evaluate the prediction  
 * improve exception handling  
 * change from fft algorithm to wavelet transformation to get a better overall frequency resolution  
 * implement GUI for easier access  
