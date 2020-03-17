@@ -20,8 +20,8 @@ Each archieve contains a beta and a stable folder. These are two seperated datab
 
 ### raw_ss
 Voice audio segments sampled at 16kHz mono. Build from the ss database  
-### raw_p75
-Voice audio segments sampled at 16kHz mono. Build from the malk and ss database by using songs wich archieved over 75%.  
+### raw_pXX
+Voice audio segments sampled at 16kHz mono. Build from the malk and ss database by using songs wich archieved over XX%.  
 <br></br>
 The raw data will stay more or less constants during this process, while the transformation method to create features is going to change regulary until the most promissing one is found.  
 
