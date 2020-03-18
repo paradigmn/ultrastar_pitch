@@ -29,7 +29,7 @@ class PCA:
         elif getattr(sys, 'frozen', False):
             # load parameter from meipass in case of binary execution
             self.__mean = np.load(os.path.join(sys._MEIPASS, "pca_mean.npy"))
-            self.__pca_comp = np.load(os.path.join(sys._MEIPASS, "pca_components.npy"))
+            self.__comp = np.load(os.path.join(sys._MEIPASS, "pca_components.npy"))
         else:
             # load parameter from binary folder
             self.__mean = np.load(os.path.join(
