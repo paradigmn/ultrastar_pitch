@@ -89,13 +89,15 @@ def main():
         # append segment features to song features
         features = np.concatenate((features, decomp.transform(spectrals)))
     # predict all block features at once (increases performance a lot!)
-    pitches_all = clf.predict_batch(features) 
+    pitches_prob = clf.predict_batch_prob(features) 
     # calculate the segment indexes from length array
     idx_0 = 0
     for lenght in len_arr:
         idx_1 = idx_0 + lenght
-        # determine the median pitch of the segment
-        pitches_new.append(int(np.median(pitches_all[idx_0:idx_1])))
+        # sum up the pitch probabilities of the segment
+        segment_prob = np.sum(pitches_prob[idx_0:idx_1], axis=0)
+        # determine the pitch with the highest probability of the segment
+        pitches_new.append(segment_prob.argmax())
         idx_0 = idx_1
 
     if not args.no_postproc:

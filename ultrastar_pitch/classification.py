@@ -78,3 +78,11 @@ class NeuronalNetwork:
         """
         predictions = self.__model.predict(np.array(feature_list), batch_size=128)
         return [pred.argmax() for pred in predictions]
+    
+    def predict_batch_prob(self, feature_list):
+        """ predict pitch probabilities of the given feature list
+        @param    feature_list   list of features to classify\n
+        @return   list of probability lists
+        """
+        predictions = self.__model.predict(np.array(feature_list), batch_size=128)
+        return [pred for pred in predictions]
