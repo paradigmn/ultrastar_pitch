@@ -81,6 +81,7 @@ v0.60 - switching from average to median pitch evaluation, changed license
 v0.6x - improved model accuracy and prediction speed  
 v0.64 - switched from scipy.io to wave library to load audio  
 v0.70 - use statistical distribution to improve the prediction  
+v0.71 - switched from median to highest likelihood pitch evaluation  
   
 ### todo
 * improve exception handling  
