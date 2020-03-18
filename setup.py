@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='ultrastar_pitch',
-      version='0.70',
+      version='0.71',
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[
@@ -13,10 +13,12 @@ setup(name='ultrastar_pitch',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
         'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.7',
         'Topic :: Multimedia :: Sound/Audio :: Analysis',
         'Topic :: Scientific/Engineering :: Information Analysis',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
       ],
       url='https://github.com/paradigmn/ultrastar_pitch',
       author='paradigm',
