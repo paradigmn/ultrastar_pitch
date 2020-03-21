@@ -74,12 +74,11 @@ class Fourier:
         if len(segment) < self.__fft_len:
             steps = 1
         else:
-            # I don't feel save mergin the divisions due to possible rounding errors
-            steps = len(segment) // self.__adv_len - self.__fft_len // self.__adv_len + 2
+            steps = (len(segment) - self.__fft_len) // self.__adv_len + 2
         for i in range(steps):
             # sliding indexes for fft window
             idx_0 = i * self.__adv_len
-            idx_1 = self.__fft_len + idx_0
+            idx_1 = idx_0 + self.__fft_len
             if i != steps - 1:
                 # multiply frame by window function to reduce artifacts
                 frame = segment[idx_0:idx_1] * self.__fft_win

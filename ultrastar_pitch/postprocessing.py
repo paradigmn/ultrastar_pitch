@@ -51,8 +51,5 @@ class Markov:
                 # compare one halfttone higher and lower for the best suiting one
                 prob_1 = self.key_table[key, (pitch + 1) % 12]
                 prob_2 = self.key_table[key, (pitch - 1) % 12]
-                if prob_1 >= prob_2:
-                    pitches[idx] = (pitch + 1) % 12
-                else:
-                    pitches[idx] = (pitch - 1) % 12
+                pitches[idx] = (pitch + 1) % 12 if prob_1 >= prob_2 else (pitch - 1) % 12
         return pitches
