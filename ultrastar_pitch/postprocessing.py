@@ -10,7 +10,10 @@
 import numpy as np
 
 class Markov:
-    """ imporoove the pitch detection by applying statistical postprocessing with markov chains """
+    """ imporoove the pitch detection by applying statistical postprocessing
+    @note: originally this class was based on markov chains (hence the name), 
+    but other methodes prooved to archieve better results
+    """
     # circle of five as matrix representation
     # the rows represent the dur key, while the columns correspond to the probability of the pitch
     # note: the probabilities where experimentally determined and manually cleaned up
@@ -36,8 +39,7 @@ class Markov:
         # count the occurance of every pitch
         pitch_distribution = [np.count_nonzero(np.array(pitches) == x) for x in range(12)]
         # calculate the weight for each key to dertermine the most likely one
-        key_weights = self.key_table @ pitch_distribution
-        return key_weights.argmax()
+        return (self.key_table @ pitch_distribution).argmax()
 
     def correct_pitches(self, key, pitches):
         """ correct the pitches by using the key probabilities\n
@@ -53,3 +55,11 @@ class Markov:
                 prob_2 = self.key_table[key, (pitch - 1) % 12]
                 pitches[idx] = (pitch + 1) % 12 if prob_1 >= prob_2 else (pitch - 1) % 12
         return pitches
+
+    def weighted_prob(self, key, prob):
+        """ revaluate the prediction probabilities by using weighting methodes / penalties  (w.i.p.) 
+        @param   key    the key of the song (0-11)\n
+        @param   prob   (n,12)-matrix of probabilities 
+        @return  matrix array with updated probabilities
+        """
+        return prob * np.array(self.key_table[key])

@@ -122,9 +122,7 @@ class ProjectParser:
         samples_mono = np.frombuffer(wav_file.readframes(wav_file.getnframes()), dtype="int16")
         wav_file.close()
         os.remove(wav_path)
-        audio_segments = []
         for segment in self.__singable:
             start_sample = int(round((segment["t_start"] * sample_rate) / 1000))
             end_sample = int(round((segment["t_end"] * sample_rate) / 1000))
-            audio_segments.append(samples_mono[start_sample:end_sample])
-        return audio_segments
+            yield samples_mono[start_sample:end_sample]

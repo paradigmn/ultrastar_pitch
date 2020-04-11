@@ -46,19 +46,19 @@ class PCA:
 
 class Fourier:
     """ calculate the averaged right half of the signals power spectrum and normalizes it """
-    def __init__(self, sample_rate=16000, fft_len=2048, adv_len=1024, fg_l=80):
+    def __init__(self, sample_rate=16000, fft_len=2048, stride=1024, fg_l=80):
         """ load class variables\n
         @param   sample_rate   sampling frequency of the input data\n
         @param   fft_len       fft window length\n
-        @param   adv_len       advance length for the averaging process\n
+        @param   stride        advance length for the averaging process\n
         @param   fg_l          lowest cutoff-freqency set lower frequencies to zero
         """
         err_str1 = "{0} has to be an positive integer value"
         assert (isinstance(sample_rate, int) and sample_rate > 0), err_str1.format("sample_rate")
         assert (isinstance(fft_len, int) and fft_len > 0), err_str1.format("fft_len")
-        assert (isinstance(adv_len, int) and adv_len > 0), err_str1.format("adv_len")
+        assert (isinstance(stride, int) and stride > 0), err_str1.format("stride")
         assert (isinstance(fg_l, int) and fg_l >= 0), err_str1.format("fg_l")
-        self.__adv_len = adv_len
+        self.__stride = stride
         self.__fft_len = fft_len
         # calculate the first sample based an the lowest cutoff-freqency
         self.__sample_l = int(np.floor(fg_l * (fft_len / sample_rate)))
@@ -74,10 +74,10 @@ class Fourier:
         if len(segment) < self.__fft_len:
             steps = 1
         else:
-            steps = (len(segment) - self.__fft_len) // self.__adv_len + 2
+            steps = (len(segment) - self.__fft_len) // self.__stride + 2
         for i in range(steps):
             # sliding indexes for fft window
-            idx_0 = i * self.__adv_len
+            idx_0 = i * self.__stride
             idx_1 = idx_0 + self.__fft_len
             if i != steps - 1:
                 # multiply frame by window function to reduce artifacts
@@ -89,11 +89,11 @@ class Fourier:
             stft = abs(np.fft.rfft(frame, n=self.__fft_len))
             # set frequencies lower fg_l to zero
             stft[:self.__sample_l] = 0
-            # scaling the data between 0 and 1. ptp() could introduce a dividing by zero exception,
+            # scaling the data between 0 and 1. max() could introduce a dividing by zero exception,
             # if avg_fft is a zero array. in this case somethink else went wrong beforehand!
             # old approach: avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
             stft -= stft.min()
-            stft /= stft.ptp()
+            stft /= stft.max()
             if np.isnan(stft).any():
                 raise ValueError("incorrect input introduced nan values!")
             spectrum.append(stft)

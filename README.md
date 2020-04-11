@@ -82,6 +82,7 @@ v0.6x - improved model accuracy and prediction speed
 v0.64 - switched from scipy.io to wave library to load audio  
 v0.70 - use statistical distribution to improve the prediction  
 v0.71 - switched from median to highest likelihood pitch evaluation  
+v0.72 - optimized performance with micro optimizations  
   
 ### todo
 * improve exception handling  
