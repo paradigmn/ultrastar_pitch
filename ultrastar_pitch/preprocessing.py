@@ -66,38 +66,33 @@ class Fourier:
         self.__fft_win = np.hanning(fft_len)
 
     def full_spectrum(self, segment):
-        """ turn an audio segment into a list of shor time ffts\n
+        """ turn an audio segment into a list of short time ffts\n
         @param    segment    an audio segment of arbitrary length\n
         @return   spectrum   stft array
         """
-        spectrum = []
         if len(segment) < self.__fft_len:
-            steps = 1
-        else:
-            steps = (len(segment) - self.__fft_len) // self.__stride + 2
-        for i in range(steps):
-            # sliding indexes for fft window
-            idx_0 = i * self.__stride
-            idx_1 = idx_0 + self.__fft_len
-            if i != steps - 1:
-                # multiply frame by window function to reduce artifacts
-                frame = segment[idx_0:idx_1] * self.__fft_win
-            else:
-                # last frame is smaller therefore a smaller window is required
-                frame = segment[idx_0:] * np.hanning(len(segment) - idx_0)
+            # frame is smaller therefore a smaller window is required
+            frames = segment * np.hanning(len(segment))
+            # zero pad frame to match size
+            frames = [np.pad(frames, (0, self.__fft_len - len(frames)), mode="constant")]
             # calculate spectrum
-            stft = abs(np.fft.rfft(frame, n=self.__fft_len))
-            # set frequencies lower fg_l to zero
-            stft[:self.__sample_l] = 0
-            # scaling the data between 0 and 1. max() could introduce a dividing by zero exception,
-            # if avg_fft is a zero array. in this case somethink else went wrong beforehand!
-            # old approach: avg_fft = MinMaxScaler().fit_transform(avg_fft.reshape(-1, 1))
-            stft -= stft.min()
-            stft /= stft.max()
-            if np.isnan(stft).any():
-                raise ValueError("incorrect input introduced nan values!")
-            spectrum.append(stft)
-        return np.array(spectrum)
+            spectrum = abs(np.fft.rfft(frames, axis=1))
+        else:
+            # create stride matrix from segment
+            rows = (len(segment) - self.__fft_len) // self.__stride + 1
+            n_stride = segment.strides[0]
+            frames = np.lib.stride_tricks.as_strided(segment, shape=(rows, self.__fft_len),
+                                                     strides=(self.__stride * n_stride , n_stride))
+            # calculate spectrum
+            spectrum = abs(np.fft.rfft(frames * self.__fft_win, axis=1))
+        # scaling the data between 0 and 1
+        spectrum -= spectrum.min(keepdims=True, axis=1)
+        spectrum /= spectrum.max(keepdims=True, axis=1)
+        # set frequencies lower fg_l to zero
+        spectrum[:,:self.__sample_l] = 0
+        if np.isnan(spectrum).any():
+            raise ValueError("incorrect input introduced nan values!")
+        return spectrum
 
     def average_fft(self, segment):
         """ turn audio segment into an averaged fft\n
