@@ -15,6 +15,16 @@ For Windows x64 there is a precompiled [executable](https://my.pcloud.com/publin
 Note: Some virus scanner identify the binary as Bitcoin miner and therefore prevent the execution. This is unfortunate but not in my power to
 control. Either add an exception or install the python application as described below.  
   
+### spleeter
+The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to separate the vocal- and instrumental part of a song. In some cases, mainly acoustic songs, ultrastar-pitch performs better with the isolated vocal data. In other cases its accuracy drops due to introduced artifacts / information loss.  
+  
+In order to use spleeter with ultrastar-pitch, a couple of steps need to be performed:  
+  
+* spleeter uses Tensorflow 1 while ultrastar-pitch uses tf2, in order to  install both python packages on the same machine, a virtual pip / conda environment is required.  
+* spleeter produces multiple outputs. The vocals.wav file needs to be placed in the same directory as the notes.txt file.  
+* in the notes.txt file the "#MP3" tag needs to be changed, that it refers to the vocal file (e.g. "#MP3:vocals.wav").  
+* after running ultrastar-pitch, the "#MP3" tag needs to be reverted back  
+  
 ## installation
 If you are using the binary, everything should run out of the box.  
 In case of an error, try to install Microsoft Visual C++ Redistributable x64 (2010+2015).  
@@ -34,17 +44,17 @@ Any instance of tensorflow < 2.0 should be removed before installing the softwar
   
 ## developer information
 ### build instructions (windows only)
-The software can be compiled into a single standalone binary. To achieve this an additional packet needs to be installed.  
+The software can be compiled into a single standalone binary. To achieve this, an additional package needs to be installed.  
 `pip install pyinstaller`  
   
-To include ffmpeg into the binary, it needs to be placed as specified by the setup.spec file. The default would be "ffmpeg\bin\ffmpeg.exe" within the project root.  
+To include ffmpeg into the binary, it needs to be placed as specified by the setup.spec file. The default would be "ffmpeg\bin\ffmpeg.exe" within the project root directory.  
   
 The building process is fairly easy. Just execute the following command within the cmd/powershell:  
 `pyinstaller setup.spec`  
 ### implementation
-The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed and averaged. The output is fed into a neuronal network to determine the pitch.  
+The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed. The output is fed into a neuronal network to determine the block pitch. Statistical postprocessing is used to determine the chunk pitch. By default a second postprocessing step is used, which determines the key of the song to reevaluate the detected pitches.  
   
-The deep learning model was trained by a large karaoke database.
+The deep learning model was trained on a large karaoke database.
 The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_stft\_pca\_median.model" stands for a tensorflow 2 model, which takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was short time fourier transformed and decomposed with PCA. The pitch was determined by calculating the median of the block pitches.  
   
 ### accuracy
@@ -54,12 +64,12 @@ To get a  better impression, you can use the "-a" flag on a song which was alrea
 `ultrastar-pitch -a`  
 This will display the accuracy of the prediction and a confusion matrix to see how close the classifier was.  
   
-### functionality
+### api
 The software is based on three modules:  
   
 * project_parser.py (parse the project for singable notes and yield audio segments)  
 * preprocessing.py (transform segments into features of uniform size)  
-* classification.py (predict pitch based on the provided pitches)  
+* classification.py (predict pitch based on the provided features)  
 * postprocessing.py (use statistics to optimize the detected pitches)  
   
 Each modules contains one or more classes to provide the needed functionality. To make use of them in your own project just import them like this:  
@@ -85,8 +95,14 @@ v0.71 - switched from median to highest likelihood pitch evaluation
 v0.72 - optimized performance with micro optimizations  
   
 ### todo
+* consider switching from tf to mxnet to use gpu accelerated numpy operations  
+* migrating numpy preprocessing into the model to make it easier to use in other languages (e.g. C#)  
+* converting model to onnx format for a lightweight runtime and transfering it to other languages / frameworks  
+* change from fft algorithm to multiscale analysis (wavelet, multiscale fft) for better low frequency resolution  
+* switching from a simple MLP network to a 1D-CNN  
+* use more sophisticated statistical postprocessing  
+* test approaches to partially automate timing detection  
 * improve exception handling  
-* change from fft algorithm to wavelet transformation to get a better overall frequency resolution  
 * implement GUI for easier access  
 
 
