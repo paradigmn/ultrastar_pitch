@@ -72,11 +72,11 @@ class Fourier:
         """
         if len(segment) < self.__fft_len:
             # frame is smaller therefore a smaller window is required
-            frames = segment * np.hanning(len(segment))
+            frame = segment * np.hanning(len(segment))
             # zero pad frame to match size
-            frames = [np.pad(frames, (0, self.__fft_len - len(frames)), mode="constant")]
+            frame = [np.pad(frame, (0, self.__fft_len - len(frame)), mode="constant")]
             # calculate spectrum
-            spectrum = abs(np.fft.rfft(frames, axis=1))
+            spectrum = abs(np.fft.rfft(frame, axis=1))
         else:
             # create stride matrix from segment
             rows = (len(segment) - self.__fft_len) // self.__stride + 1
@@ -99,12 +99,9 @@ class Fourier:
         @param    segment   an audio segment of arbitrary length\n
         @return   averaged fft
         """
-        avg_fft = 0
-        spectrum = self.full_spectrum(segment)
-        # average ffts
-        for fft in spectrum:
-            avg_fft += fft
+        # average ful spectrum ffts
+        avg_fft = np.sum(self.full_spectrum(segment), axis=0)
         # normalize output
         avg_fft -= avg_fft.min()
-        avg_fft /= avg_fft.ptp()
+        avg_fft /= avg_fft.max()
         return avg_fft
