@@ -49,9 +49,14 @@ class ProjectParser:
         self.__singable.clear()
         self.__file_buffer.clear()
         self.__proj_dir = os.path.dirname(note_file)
-        note_file = open(note_file, 'r', encoding="utf-8")
+        notes = open(note_file, 'r', encoding="utf-8")
         # buffer file for later reuse
-        self.__file_buffer = note_file.read().splitlines(True)
+        try:
+            self.__file_buffer = notes.read().splitlines(True)
+        except UnicodeDecodeError:
+            # if the file doesn't use utf-8, try ansi
+            notes = open(note_file, 'r', encoding="iso-8859-1")
+            self.__file_buffer = notes.read().splitlines(True)
         for line in self.__file_buffer:
             # parse header
             if line.startswith('#') and not self.__singable:
