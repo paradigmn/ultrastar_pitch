@@ -65,7 +65,7 @@ def main():
     # init data preprocessor
     trafo = Fourier(stride=128)
     # init pitch classifier
-    clf = OnnxNeuronalNetwork()
+    clf = NeuronalNetwork()
     # init pca decomposer
     decomp = PCA()
     # init postprocessor
