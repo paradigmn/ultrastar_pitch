@@ -13,7 +13,7 @@ import numpy as np
 from .project_parser import ProjectParser
 from .preprocessing import Fourier
 from .preprocessing import PCA
-from .classification import OnnxNeuronalNetwork
+from .classification import NeuronalNetwork
 from .postprocessing import Markov
 
 # convert between numerical and alphabetic pitch notation
