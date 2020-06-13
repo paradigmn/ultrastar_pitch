@@ -23,11 +23,11 @@ class NeuronalNetwork:
             self.sess = rt.InferenceSession(model)
         elif getattr(sys, 'frozen', False):
             # load tmodel from meipass in case of binary execution
-            self.sess = rt.InferenceSession(os.path.join(sys._MEIPASS, "model.onnx"))
+            self.sess = rt.InferenceSession(os.path.join(sys._MEIPASS, "tf2_256_96_12_stft_pca_stat.onnx"))
         else:
             # load models from binary folder
             self.sess = rt.InferenceSession(os.path.join(os.path.dirname(__file__), 
-                                                         "binaries",  "model.onnx"))
+                                                         "binaries",  "tf2_256_96_12_stft_pca_stat.onnx"))
         self.input_name = self.sess.get_inputs()[0].name 
 
     def predict(self, features):
