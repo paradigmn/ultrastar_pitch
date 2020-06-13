@@ -13,7 +13,7 @@ import numpy as np
 from .project_parser import ProjectParser
 from .preprocessing import Fourier
 from .preprocessing import PCA
-from .classification import NeuronalNetwork
+from .classification import OnnxNeuronalNetwork
 from .postprocessing import Markov
 
 # convert between numerical and alphabetic pitch notation
@@ -65,7 +65,7 @@ def main():
     # init data preprocessor
     trafo = Fourier(stride=128)
     # init pitch classifier
-    clf = NeuronalNetwork()
+    clf = OnnxNeuronalNetwork()
     # init pca decomposer
     decomp = PCA()
     # init postprocessor
@@ -88,7 +88,7 @@ def main():
         # append segment features to song features
         features.append(decomp.transform(spectrals))
     # predict all block features at once (increases performance a lot!)
-    pitches_prob = clf.predict_batch_prob(np.concatenate(features))
+    pitches_prob = clf.predict(np.concatenate(features))
     # calculate the segment indexes from length array
     idx_0 = 0
     for lenght in len_arr:
