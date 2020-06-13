@@ -6,8 +6,7 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 MODULE = 'ultrastar-pitch-runner.py'
 FFMPEG_BIN = 'ffmpeg.exe'
 FFMPEG_DIR = 'ffmpeg\\bin\\'
-MODEL_NAME = 'tf2_256_96_12_stft_pca_stat.onnx'
-MODEL_PATH = 'ultrastar_pitch\\binaries\\tf2_256_96_12_stft_pca_stat.onnx\\'
+MODEL_ONNX = 'tf2_256_96_12_stft_pca_stat.onnx'
 PCA_COMP = 'pca_components.npy'
 PCA_MEAN = 'pca_mean.npy'
 BIN_DIR = 'ultrastar_pitch\\binaries\\'
@@ -16,8 +15,8 @@ block_cipher = None
 a = Analysis([MODULE],
              pathex=[os.getcwd()],
              binaries=[],
-             datas = collect_data_files('tensorflow_core', subdir=None, include_py_files=True) + collect_data_files('astor', subdir=None, include_py_files=True),
-             hiddenimports = collect_submodules('tensorflow_core'),
+             datas = [],
+             hiddenimports = [],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -31,10 +30,11 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
           a.binaries + [(FFMPEG_BIN, os.path.join(FFMPEG_DIR, FFMPEG_BIN), 'BINARY')] +
+          			   [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), 'BINARY')] +
                        [(PCA_COMP, os.path.join(BIN_DIR, PCA_COMP), 'BINARY')] +
                        [(PCA_MEAN, os.path.join(BIN_DIR, PCA_MEAN), 'BINARY')],
           a.zipfiles,
-          a.datas + Tree(MODEL_PATH, prefix=MODEL_NAME),
+          a.datas,
           [],
           name='ultrastar_pitch',
           debug=False,
