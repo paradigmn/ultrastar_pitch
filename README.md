@@ -20,7 +20,6 @@ The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to
   
 In order to use spleeter with ultrastar-pitch, a couple of steps need to be performed:  
   
-* spleeter uses Tensorflow 1 while ultrastar-pitch uses tf2, in order to  install both python packages on the same machine, a virtual pip / conda environment is required.  
 * spleeter produces multiple outputs. The vocals.wav file needs to be placed in the same directory as the notes.txt file.  
 * in the notes.txt file the "#MP3" tag needs to be changed, that it refers to the vocal file (e.g. "#MP3:vocals.wav").  
 * after running ultrastar-pitch, the "#MP3" tag needs to be reverted back  
@@ -40,8 +39,6 @@ Open a terminal and type:
 `sudo apt-get install python3 python3-pip ffmpeg`  
 `pip install ultrastar-pitch`  
   
-Any instance of tensorflow < 2.0 should be removed before installing the software.
-  
 ## developer information
 ### build instructions (windows only)
 The software can be compiled into a single standalone binary. To achieve this, an additional package needs to be installed.  
@@ -55,7 +52,7 @@ The building process is fairly easy. Just execute the following command within t
 The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed. The output is fed into a neuronal network to determine the block pitch. Statistical postprocessing is used to determine the chunk pitch. By default a second postprocessing step is used, which determines the key of the song to reevaluate the detected pitches.  
   
 The deep learning model was trained on a large karaoke database.
-The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_stft\_pca\_median.model" stands for a tensorflow 2 model, which takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was short time fourier transformed and decomposed with PCA. The pitch was determined by calculating the median of the block pitches.  
+The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_stft\_pca\_stat.onnx" stands for a tensorflow 2 model, which was converted to the onnx format. It takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was short time fourier transformed and decomposed with PCA. The pitch is determined by statistic postprocessing.  
   
 ### accuracy
 The precision of this method changes greatly with the analyzed audio. For example a ballad with slow background music and a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.  
@@ -94,11 +91,9 @@ v0.70 - use statistical distribution to improve the prediction
 v0.71 - switched from median to highest likelihood pitch evaluation  
 v0.72 - optimized performance with micro optimizations  
 v0.73 - added support for ansi encoded note.txt files  
+v0.80 - switched to oonx framework for model load  
   
 ### todo
-* consider switching from tf to mxnet to use gpu accelerated numpy operations  
-* migrating numpy preprocessing into the model to make it easier to use in other languages (e.g. C#)  
-* converting model to onnx format for a lightweight runtime and transfering it to other languages / frameworks  
 * change from fft algorithm to multiscale analysis (wavelet, multiscale fft) for better low frequency resolution  
 * switching from a simple MLP network to a 1D-CNN  
 * use more sophisticated statistical postprocessing  
