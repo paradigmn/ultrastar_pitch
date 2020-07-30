@@ -91,12 +91,14 @@ v0.70 - use statistical distribution to improve the prediction
 v0.71 - switched from median to highest likelihood pitch evaluation  
 v0.72 - optimized performance with micro optimizations  
 v0.73 - added support for ansi encoded note.txt files  
-v0.80 - switched to oonx framework for model load  
+v0.80 - switched to onnx framework for model load and inference  
+v0.81 - fixed exception for silent audio input  
   
 ### todo
 * change from fft algorithm to multiscale analysis (wavelet, multiscale fft) for better low frequency resolution  
 * switching from a simple MLP network to a 1D-CNN  
 * use more sophisticated statistical postprocessing  
+* deploy training data as compiled potobuf  
 * test approaches to partially automate timing detection  
 * improve exception handling  
 * implement GUI for easier access  

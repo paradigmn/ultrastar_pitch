@@ -10,6 +10,7 @@
 
 import os
 import sys
+import logging
 import numpy as np
 
 class PCA:
@@ -82,16 +83,21 @@ class Fourier:
             rows = (len(segment) - self.__fft_len) // self.__stride + 1
             n_stride = segment.strides[0]
             frames = np.lib.stride_tricks.as_strided(segment, shape=(rows, self.__fft_len),
-                                                     strides=(self.__stride * n_stride , n_stride))
+                                                     strides=(self.__stride * n_stride, n_stride))
             # calculate spectrum
             spectrum = abs(np.fft.rfft(frames * self.__fft_win, axis=1))
-        # scaling the data between 0 and 1
+        # remove spectral offset
         spectrum -= spectrum.min(keepdims=True, axis=1)
+        # strip zero rows from spectrum to avoid division by zero
+        spectrum = spectrum[~np.all(spectrum == 0, axis=1)]
+        # scale spectrum between 0 and 1
         spectrum /= spectrum.max(keepdims=True, axis=1)
         # set frequencies lower fg_l to zero
-        spectrum[:,:self.__sample_l] = 0
-        if np.isnan(spectrum).any():
-            raise ValueError("incorrect input introduced nan values!")
+        spectrum[:, :self.__sample_l] = 0
+        # segment is either silent or corrupt -> return zeros array
+        if np.isnan(spectrum).any() or len(spectrum) == 0:
+            logging.warning("incorrect input introduced nan values. check audio file integrity!")
+            spectrum = np.zeros((1, self.__fft_len // 2 + 1))
         return spectrum
 
     def average_fft(self, segment):

@@ -18,17 +18,25 @@ class NeuronalNetwork:
         """ load class variables\n
         @param   model   path to previous trained tf-keras model
         """
+        sess_options = rt.SessionOptions()
+        # enable parallel graph execution
+        sess_options.execution_mode = rt.ExecutionMode.ORT_PARALLEL
+        # optimize graph at runtime
+        sess_options.graph_optimization_level = rt.GraphOptimizationLevel.ORT_ENABLE_ALL
         if model:
             # load model from external source
-            self.sess = rt.InferenceSession(model)
+            self.sess = rt.InferenceSession(model, sess_options)
         elif getattr(sys, 'frozen', False):
             # load tmodel from meipass in case of binary execution
-            self.sess = rt.InferenceSession(os.path.join(sys._MEIPASS, "tf2_256_96_12_stft_pca_stat.onnx"))
+            self.sess = rt.InferenceSession(
+                os.path.join(sys._MEIPASS, "tf2_256_96_12_stft_pca_stat.onnx"),
+                sess_options)
         else:
             # load models from binary folder
-            self.sess = rt.InferenceSession(os.path.join(os.path.dirname(__file__), 
-                                                         "binaries",  "tf2_256_96_12_stft_pca_stat.onnx"))
-        self.input_name = self.sess.get_inputs()[0].name 
+            self.sess = rt.InferenceSession(
+                os.path.join(os.path.dirname(__file__),
+                             "binaries", "tf2_256_96_12_stft_pca_stat.onnx"), sess_options)
+        self.input_name = self.sess.get_inputs()[0].name
 
     def predict(self, features):
         """ predict pitch probabilities of the given feature list
