@@ -23,7 +23,7 @@ class PCA:
                  the "mean_" and "components_" member variable from the model\n
                  this approach was choosen to avoid a dependency on the sklearn and pickle packages
         """
-        if pca_mean and pca_components:
+        if pca_mean is not None and pca_components is not None:
             # load parameter from external source
             self.__mean = pca_mean
             self.__comp = pca_components
@@ -37,13 +37,15 @@ class PCA:
                 os.path.dirname(__file__), "binaries", "pca_mean.npy"))
             self.__comp = np.load(os.path.join(
                 os.path.dirname(__file__), "binaries", "pca_components.npy"))
+        # transpose matrix for later dot multiplication
+        self.__comp = self.__comp.T
 
     def transform(self, features):
         """ apply pca by means of matrix calculation\n
         @param    features   input data for pca\n
         @return   reduced feature set
         """
-        return np.dot((features - self.__mean), self.__comp.T)
+        return np.dot((features - self.__mean), self.__comp)
 
 class Fourier:
     """ calculate the averaged right half of the signals power spectrum and normalizes it """
@@ -79,11 +81,13 @@ class Fourier:
             # calculate spectrum
             spectrum = abs(np.fft.rfft(frame, axis=1))
         else:
+            # use dynamic stride for larger inputs
+            dyn_stride = self.__stride * (len(segment) // self.__fft_len)
             # create stride matrix from segment
-            rows = (len(segment) - self.__fft_len) // self.__stride + 1
+            rows = (len(segment) - self.__fft_len) // dyn_stride + 1
             n_stride = segment.strides[0]
             frames = np.lib.stride_tricks.as_strided(segment, shape=(rows, self.__fft_len),
-                                                     strides=(self.__stride * n_stride, n_stride))
+                                                     strides=(dyn_stride * n_stride, n_stride))
             # calculate spectrum
             spectrum = abs(np.fft.rfft(frames * self.__fft_win, axis=1))
         # remove spectral offset
