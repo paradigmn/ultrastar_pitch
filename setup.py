@@ -1,11 +1,16 @@
 from setuptools import setup
+import os
 
 def readme():
     with open('README.rst') as f:
         return f.read()
+    
+version = {}
+with open(os.path.join(os.path.dirname(__file__), "ultrastar_pitch", "version.py")) as fp:
+    exec(fp.read(), version)
 
 setup(name='ultrastar_pitch',
-      version='0.82',
+      version=version["__version__"],
       description='An attempt to automate the pitch detection for USDX projects',
       long_description=readme(),
       classifiers=[

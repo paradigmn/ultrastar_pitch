@@ -93,13 +93,13 @@ v0.72 - optimized performance with micro optimizations
 v0.73 - added support for ansi encoded note.txt files  
 v0.80 - switched to onnx framework for model load and inference  
 v0.81 - fixed exception for silent audio input  
-v0.82 - use dynamic stride to accelerate proessing, removed model initializer, minor fixes  
+v0.82 - use dynamic stride to accelerate processing, removed model initializer, minor fixes  
   
 ### todo
 * change from fft algorithm to multiscale analysis (wavelet, multiscale fft) for better low frequency resolution  
 * switching from a simple MLP network to a 1D-CNN  
 * use more sophisticated statistical postprocessing  
-* deploy training data as compiled potobuf  
+* deploy training data as compiled protobuf  
 * test approaches to partially automate timing detection  
 * improve exception handling  
 * implement GUI for easier access  

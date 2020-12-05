@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@file          __main__.py
+@file          __init__.py
 @brief         wrapper module for importing submodules
 @author        paradigm
 """
