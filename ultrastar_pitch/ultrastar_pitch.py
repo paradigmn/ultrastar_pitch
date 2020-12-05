@@ -58,7 +58,7 @@ def main():
                                            Markov())
     # run graphical user interface for pitch detection
     if args.gui or getattr(sys, 'frozen', False):
-        Gui(detection_pipeline, postproc=args.no_postproc)
+        Gui(detection_pipeline)
         return
     # run command line interface for pitch detection
     pitches_old, pitches_new = detection_pipeline.transform(args.input,
