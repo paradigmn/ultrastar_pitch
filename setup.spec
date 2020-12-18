@@ -1,45 +1,52 @@
-# -*- mode: python -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+@file          setup.spec
+@brief         specification file for pyinstaller
+@author        paradigm
+"""
 
 import os
-from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 
-MODULE = 'ultrastar-pitch-runner.py'
-FFMPEG_BIN = 'ffmpeg.exe'
-FFMPEG_DIR = 'ffmpeg\\bin\\'
-MODEL_ONNX = 'tf2_256_96_12_stft_pca_stat.onnx'
-PCA_COMP = 'pca_components.npy'
-PCA_MEAN = 'pca_mean.npy'
-BIN_DIR = 'ultrastar_pitch\\binaries\\'
-block_cipher = None
+MODULE = "ultrastar-pitch-runner.py"
+FFMPEG_BIN = "ffmpeg.exe"
+FFMPEG_DIR = "ffmpeg\\bin\\"
+MODEL_ONNX = "pitchnet_2020_12_14.onnx"
+BIN_DIR = "ultrastar_pitch\\binaries\\"
+BLOCK_CIPHER = None
 
-a = Analysis([MODULE],
-             pathex=[os.getcwd()],
-             binaries=[],
-             datas = [],
-             hiddenimports = [],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher,
-             noarchive=False)
+a = Analysis(
+    [MODULE],
+    pathex=[os.getcwd()],
+    binaries=[],
+    datas=[],
+    hiddenimports=[],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=BLOCK_CIPHER,
+    noarchive=False,
+)
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data, cipher=BLOCK_CIPHER)
 
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries + [(FFMPEG_BIN, os.path.join(FFMPEG_DIR, FFMPEG_BIN), 'BINARY')] +
-          			   [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), 'BINARY')] +
-                       [(PCA_COMP, os.path.join(BIN_DIR, PCA_COMP), 'BINARY')] +
-                       [(PCA_MEAN, os.path.join(BIN_DIR, PCA_MEAN), 'BINARY')],
-          a.zipfiles,
-          a.datas,
-          [],
-          name='ultrastar_pitch',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          runtime_tmpdir=None,
-          console=True)
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries
+    + [(FFMPEG_BIN, os.path.join(FFMPEG_DIR, FFMPEG_BIN), "BINARY")]
+    + [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), "BINARY")],
+    a.zipfiles,
+    a.datas,
+    [],
+    name="ultrastar_pitch",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    runtime_tmpdir=None,
+    console=False,
+)

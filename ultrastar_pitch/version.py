@@ -7,9 +7,4 @@
 @author        paradigm
 """
 
-from datetime import datetime
-
-__version__ = "dev_build_" + \
-              str(datetime.date(datetime.now())).replace("-", "_") + \
-              "_" + \
-              str(datetime.time(datetime.now())).replace(":", "_").replace(".", "_")
+__version__ = "1.0.0"
