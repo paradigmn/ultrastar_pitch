@@ -14,10 +14,7 @@ PITCH_MAP = {0 : "C_", 1 : "C#", 2 : "D_", 3 : "D#", 4 : "E_", 5 : "F_",
              6 : "F#", 7 : "G_", 8 : "G#", 9 : "A_", 10 : "A#", 11 : "B_"}
 
 def prediction_score(y_true: np.ndarray, y_pred: np.ndarray):
-    """ evaluate the prediction by showing accuracy and confusion matrix
-    @param y_true  original pitches (manually labeled)
-    @param y_pred  predicted pitches
-    """
+    """ evaluate the prediction by showing accuracy and confusion matrix """
     # calculate confusion matrix
     c_mat = np.zeros((len(PITCH_MAP), len(PITCH_MAP)))
     for y_t, y_p in zip(y_true, y_pred):

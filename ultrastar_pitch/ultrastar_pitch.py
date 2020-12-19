@@ -93,6 +93,6 @@ def main():
     pitches_old, pitches_new = detection_pipeline.transform(
         args.input, args.output, args.no_postproc
     )
-    # output confusiuon matrix with prediction score
+    # output confusion matrix with prediction score
     if args.accuracy:
         prediction_score(np.array(pitches_old), np.array(pitches_new))

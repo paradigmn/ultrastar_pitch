@@ -52,7 +52,7 @@ class StochasticPostprocessor:
     )
 
     @classmethod
-    def detect_key(cls, pitches):
+    def detect_key(cls, pitches: list) -> int:
         """ find the pseudo key of a song by analysing the detected pitches """
         # count the occurance of every pitch
         pitch_distribution = [
@@ -62,7 +62,7 @@ class StochasticPostprocessor:
         return (cls.KEY_TABLE @ pitch_distribution).argmax()
 
     @classmethod
-    def correct_pitches(cls, key, pitches):
+    def correct_pitches(cls, key: int, pitches: list) -> list:
         """ correct the pitches by using the pseudo key probabilities """
         for idx, pitch in enumerate(pitches):
             # if pitch doesn't harmonize with key, find a better on
