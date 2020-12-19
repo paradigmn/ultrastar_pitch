@@ -1,22 +1,16 @@
 # ultrastar_pitch
-This python application is an attempt to automate the pitch detection for USDX projects.  
+This python application automates the pitch detection for ultrastar deluxe projects.  
   
 ## usage
-Since version 0.40 the project is a standalone terminal application. After the installation it can simply be executed in the shell via:  
-`ultrastar-pitch`  
-  
-If the usdx file is named "notes.txt", no arguments are necessary. If it is named any different it has to be explicitly stated:  
+The software can be used with user interface or as command line application. The windows [binary](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37) automatically starts as a graphical user application.
+
+For cli execution, just run the command in your project folder. Additional flags are listed below. If the usdx file is named "notes.txt", no arguments are needed. Otherwise it has to be explicitly stated:  
 `ultrastar-pitch name.txt`  
-If everything went well a new file "notes_new.txt" should appear. In case a different output name is desired it can be changed with the "-o" flag:  
+If everything went well a new file "notes_new.txt" should appear. In case a different output name is desired, it can be changed with the "-o" flag:  
 `ultrastar-pitch -o name_new.txt`  
-  
-For Windows x64 there is a precompiled [executable](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37) available. Just place it in your project folder with a "note.txt" and "song.mp3" file and execute it.  
-  
-Note: Some virus scanner identify the binary as Bitcoin miner and therefore prevent the execution. This is unfortunate but not in my power to
-control. Either add an exception or install the python application as described below.  
-  
+
 ### spleeter
-The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to separate the vocal- and instrumental part of a song. In some cases, mainly acoustic songs, ultrastar-pitch performs better with the isolated vocal data. In other cases its accuracy drops due to introduced artifacts / information loss.  
+The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to separate the vocal- and instrumental part of a song. In some cases (mainly acoustic songs), ultrastar-pitch performs better with the isolated vocal data. In other cases, its accuracy drops due to the introduced artifacts / information loss.  
   
 In order to use spleeter with ultrastar-pitch, a couple of steps need to be performed:  
   
@@ -25,7 +19,7 @@ In order to use spleeter with ultrastar-pitch, a couple of steps need to be perf
 * after running ultrastar-pitch, the "#MP3" tag needs to be reverted back  
   
 ## installation
-If you are using the binary, everything should run out of the box.  
+If you are using the [binary](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37), everything should run out of the box.  
 In case of an error, try to install Microsoft Visual C++ Redistributable x64 (2010+2015).  
   
 If you want to use the python application do the following:  
@@ -39,9 +33,21 @@ Open a terminal and type:
 `sudo apt-get install python3 python3-pip ffmpeg`  
 `pip install ultrastar-pitch`  
   
+## flags
+Command line options for nono graphical execution:  
+  
+| flag | description                           |
+|------|---------------------------------------|
+| -h   | show this help message and exit       |
+| -o   | specify output file name              |
+| -g   | enable graphical user interface       |
+| -m   | disable stochastic postprocessing     |
+| -a   | show prediction accuracy (debug flag) |
+| -l   | set logging level (debug flag)        |
+  
 ## developer information
 ### build instructions (windows only)
-The software can be compiled into a single standalone binary. To achieve this, an additional package needs to be installed.  
+The software can be compiled into a single standalone binary. To achieve this, an additional package has to be installed.  
 `pip install pyinstaller`  
   
 To include ffmpeg into the binary, it needs to be placed as specified by the setup.spec file. The default would be "ffmpeg\bin\ffmpeg.exe" within the project root directory.  
@@ -49,60 +55,63 @@ To include ffmpeg into the binary, it needs to be placed as specified by the set
 The building process is fairly easy. Just execute the following command within the cmd/powershell:  
 `pyinstaller setup.spec`  
 ### implementation
-The software takes a timed USDX file and the corresponding audio file. The song is converted into a mono wav file and gets split into the predefined audio segments. These chunks are divided into blocks to be fourier transformed. The output is fed into a neuronal network to determine the block pitch. Statistical postprocessing is used to determine the chunk pitch. By default a second postprocessing step is used, which determines the key of the song to reevaluate the detected pitches.  
+The software takes a timed usdx project file and the corresponding audio file. The song is converted into a mono wav and gets split into the predefined audio segments. These chunks are divided into blocks to be transformed into features. The output is then fed into a neuronal network to determine the pitches. Statistical postprocessing is used to determine pseudo key of the song. The predicted pitches are reevaluated to match the pseudo key.
   
-The deep learning model was trained on a large karaoke database.
-The model structure can be derived from its name. E.g: "tf2\_256\_96\_12\_stft\_pca\_stat.onnx" stands for a tensorflow 2 model, which was converted to the onnx format. It takes 256 input values, has a hidden layers with 96 nodes and 12 outputs. Furthermore the input was short time fourier transformed and decomposed with PCA. The pitch is determined by statistic postprocessing.  
+The deep learning model was trained on a large karaoke database. Details for building your own model can be found in the dev/ folder.
   
 ### accuracy
 The precision of this method changes greatly with the analyzed audio. For example a ballad with slow background music and a strong female voice can get an accuracy of over 90%, while a rock song with loud background music and a rough male voice can drop below 30%.  
-  
-To get a  better impression, you can use the "-a" flag on a song which was already translated:  
-`ultrastar-pitch -a`  
-This will display the accuracy of the prediction and a confusion matrix to see how close the classifier was.  
-  
+
 ### api
-The software is based on three modules:  
+The software consists of various modules:  
   
-* project_parser.py (parse the project for singable notes and yield audio segments)  
-* preprocessing.py (transform segments into features of uniform size)  
-* classification.py (predict pitch based on the provided features)  
-* postprocessing.py (use statistics to optimize the detected pitches)  
+| module                  | description                                                |
+|-------------------------|------------------------------------------------------------|
+| ProjectParser           | parse note.txt project file for singable audio segments    |
+| AudioPreprocessor       | transform audio segments into features for pitch detection |
+| PitchClassifier         | predict pitches from features                              |
+| StochasticPostprocessor | increase prediction accuracy by applying stochastics       |
+| DetectionPipeline       | execute the models above in one pipeline                   |
   
-Each modules contains one or more classes to provide the needed functionality. To make use of them in your own project just import them like this:  
-`from ultrastar_pitch.module import class`  
+Each modules can be used in your own project. Just import them like this:  
+`from ultrastar_pitch import module`  
   
-### version history
-v0.10 - first running implementation  
-v0.20 - replaced pydub by subprocess and scipy wavfile read -> faster processing  
-v0.21 - got pyinstaller running -> binary doesn't need separate ffmpeg anymore  
-v0.30 - added deep learning support and improved source code readability  
-v0.31 - substitute license field with classifier and updated installer script  
-v0.32 - added model to PyPi repo -> is now used by default  
-v0.33 - using absolute paths instead of relative ones  
-v0.34 - bug fixes  
-v0.40 - complete restructuring and application works as command line application  
-v0.41 - fixed behavior for some edge cases  
-v0.50 - implemented PCA, bumped tensorflow to version 2 and improved model accuracy and speed  
-v0.60 - switching from average to median pitch evaluation, changed license  
-v0.6x - improved model accuracy and prediction speed  
-v0.64 - switched from scipy.io to wave library to load audio  
-v0.70 - use statistical distribution to improve the prediction  
-v0.71 - switched from median to highest likelihood pitch evaluation  
-v0.72 - optimized performance with micro optimizations  
-v0.73 - added support for ansi encoded note.txt files  
-v0.80 - switched to onnx framework for model load and inference  
-v0.81 - fixed exception for silent audio input  
-v0.82 - use dynamic stride to accelerate processing, removed model initializer, minor fixes  
+### changelog
+| version | changelog                                                                             |
+|---------|---------------------------------------------------------------------------------------|
+| 1.0.0   | minimalistic gui, new preprocessing algo, new model, api restructuring                |
+| 0.82    | use dynamic stride to accelerate processing, removed model initializer, minor fixes   |
+| 0.81    | fixed exception for silent audio input                                                |
+| 0.80    | switched to onnx framework for model load and inference                               |
+| 0.73    | added support for ansi encoded note.txt files                                         |
+| 0.72    | optimized performance with micro optimizations                                        |
+| 0.71    | switched from median to highest likelihood pitch evaluation                           |
+| 0.70    | use statistical distribution to improve the prediction                                |
+| 0.64    | switched from scipy.io to wave library to load audio                                  |
+| 0.6x    | improved model accuracy and prediction speed                                          |
+| 0.60    | switching from average to median pitch evaluation, changed license                    |
+| 0.50    | implemented PCA, bumped tensorflow to version 2 and improved model accuracy and speed |
+| 0.41    | fixed behavior for some edge cases                                                    |
+| 0.40    | complete restructuring and application works as command line application              |
+| 0.34    | bug fixes                                                                             |
+| 0.33    | using absolute paths instead of relative ones                                         |
+| 0.32    | added model to PyPi repo -> is now used by default                                    |
+| 0.31    | substitute license field with classifier and updated installer script                 |
+| 0.30    | added deep learning support and improved source code readability                      |
+| 0.21    | got pyinstaller running -> binary doesn't need separate ffmpeg anymore                |
+| 0.20    | replaced pydub by subprocess and scipy wavfile read -> faster processing              |
+| 0.10    | first running implementation                                                          |
   
 ### todo
-* change from fft algorithm to multiscale analysis (wavelet, multiscale fft) for better low frequency resolution  
-* switching from a simple MLP network to a 1D-CNN  
-* use more sophisticated statistical postprocessing  
-* deploy training data as compiled protobuf  
-* test approaches to partially automate timing detection  
-* improve exception handling  
-* implement GUI for easier access  
+* more sophisticated statistical postprocessing  
+* evaluate approaches for partial automate timing detection  
+* siamese neural network for multi octave detection  
+* evaluate accuracy with higher samplerates  
+* integrate preprocessing into model  
+* evaluate fcnn networks with variable input length  
+* integrate resampling into model  
+* evaluate accuracy with sequence models (rnns, grus, lstms)  
+* more logging  
 
 
 
