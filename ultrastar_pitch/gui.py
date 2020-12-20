@@ -8,8 +8,10 @@
 """
 
 import os
+import sys
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import logging
 
 from .detection_pipeline import DetectionPipeline
@@ -27,14 +29,11 @@ class Gui(tk.Frame):
         # build window
         root.title("ultrastar_pitch")
         root.geometry("600x300")
-        root.iconphoto(
-            True,
-            tk.PhotoImage(
-                file=os.path.join(
-                    os.path.dirname(__file__), "binaries", "icon.png"
-                )
-            ),
-        )
+        if getattr(sys, "frozen", False):
+        	icon = os.path.join(sys._MEIPASS, "icon.ico")
+        else:
+        	icon = os.path.join(os.path.dirname(__file__), "binaries", "icon.ico")
+        root.iconbitmap(icon)
         # text labels
         path_lbl = tk.Label(root, text="notes.txt:")
         path_lbl.place(x=160, y=80)
@@ -83,6 +82,7 @@ class Gui(tk.Frame):
             )
             self.done_lbl.configure(text="done!")
             logging.debug("done!")
-        except:
-            self.done_lbl.configure(text="invalid input file!")
-            logging.error("fatal!")
+        except Exception as e:
+            self.done_lbl.configure(text="failed!")
+            messagebox.showerror("error", e)
+            logging.error(e)

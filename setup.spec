@@ -9,10 +9,11 @@
 
 import os
 
-MODULE = "ultrastar-pitch-runner.py"
+MODULE = "ultrastar_pitch_runner.py"
 FFMPEG_BIN = "ffmpeg.exe"
 FFMPEG_DIR = "ffmpeg\\bin\\"
 MODEL_ONNX = "pitchnet_2020_12_14.onnx"
+ICON_BIN = "icon.ico"
 BIN_DIR = "ultrastar_pitch\\binaries\\"
 BLOCK_CIPHER = None
 
@@ -21,7 +22,7 @@ a = Analysis(
     pathex=[os.getcwd()],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=["tkinter"],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
@@ -38,7 +39,8 @@ exe = EXE(
     a.scripts,
     a.binaries
     + [(FFMPEG_BIN, os.path.join(FFMPEG_DIR, FFMPEG_BIN), "BINARY")]
-    + [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), "BINARY")],
+    + [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), "BINARY")]
+    + [(ICON_BIN, os.path.join(BIN_DIR, ICON_BIN), "BINARY")],
     a.zipfiles,
     a.datas,
     [],
@@ -49,4 +51,5 @@ exe = EXE(
     upx=True,
     runtime_tmpdir=None,
     console=False,
+    icon=os.path.join(BIN_DIR, ICON_BIN),
 )

@@ -117,6 +117,7 @@ class ProjectParser:
         # convert mp3 to temporary mono wav file
         audio_path = os.path.join(self.proj_dir, self.meta["#MP3"])
         wav_path = os.path.join(self.proj_dir, "tmp.wav")
+        subprocess._cleanup()
         subprocess.run(
             [
                 self.ffmpeg,
@@ -129,9 +130,11 @@ class ProjectParser:
                 str(sample_rate),
                 wav_path,
             ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             check=True,
+            shell=True,
         )
         # load wav into numpy array for processing and discard file
         wav_file = wave.open(wav_path)
