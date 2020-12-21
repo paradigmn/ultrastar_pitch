@@ -34,7 +34,7 @@ class Gui(tk.Frame):
         else:
             icon_path = os.path.join(os.path.dirname(__file__), "binaries")
         if sys.platform == "win32":
-            root.iconbitmap(os.path.join(icon_path), "icon.ico")
+            root.iconbitmap(os.path.join(icon_path, "icon.ico"))
         else:
             root.iconphoto(True, tk.PhotoImage(file=os.path.join(icon_path, "icon.png")))
         # text labels
