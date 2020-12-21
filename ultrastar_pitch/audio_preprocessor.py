@@ -59,7 +59,7 @@ class AudioPreprocessor:
         # segment is either silent or corrupt -> return zeros array
         if np.isnan(mdct).any() or len(mdct) == 0:
             logging.warning(
-                "incorrect input introduced nan values. check audio file integrity!"
+                "invalid input introduced nan values. check audio file integrity!"
             )
             mdct = np.zeros((1, self.win_len // 2))
         return mdct

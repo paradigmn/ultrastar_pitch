@@ -134,7 +134,7 @@ class ProjectParser:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=True,
-            shell=True,
+            shell=False,
         )
         # load wav into numpy array for processing and discard file
         wav_file = wave.open(wav_path)
