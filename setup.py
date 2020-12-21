@@ -11,22 +11,19 @@ import os
 from setuptools import setup
 
 
-def readme():
-    """ load readme file for pypi integration """
-    with open("README.md") as f:
-        return f.read()
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 version = {}
-with open(
-    os.path.join(os.path.dirname(__file__), "ultrastar_pitch", "version.py")
-) as fp:
+with open(os.path.join(os.path.dirname(__file__), "ultrastar_pitch", "version.py")) as fp:
     exec(fp.read(), version)
 
 setup(
     name="ultrastar_pitch",
     version=version["__version__"],
     description="Automate the pitch detection process for Ultrastar Deluxe karaoke projects",
-    long_description=readme(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=[
         "Intended Audience :: End Users/Desktop",
         "Operating System :: Microsoft :: Windows",
