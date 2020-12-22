@@ -2,7 +2,7 @@
 This python application automates the pitch detection for ultrastar deluxe projects.  
   
 ## usage
-The software can be used with user interface or as command line application. The windows [binary](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37) automatically starts as a graphical user application.
+The software can be used with user interface or as command line application. The windows [binary](https://github.com/paradigmn/ultrastar_pitch/releases) automatically starts as a graphical user application.
 
 For cli execution, just run the command in your project folder. Additional flags are listed below. If the usdx file is named "notes.txt", no arguments are needed. Otherwise it has to be explicitly stated:  
 `ultrastar-pitch name.txt`  
@@ -19,7 +19,7 @@ In order to use spleeter with ultrastar-pitch, a couple of steps need to be perf
 * after running ultrastar-pitch, the "#MP3" tag needs to be reverted back  
   
 ## installation
-If you are using the [binary](https://my.pcloud.com/publink/show?code=kZt3wA7ZnxhL5olW9IkS2FX7DchyBp5k4J37), everything should run out of the box.  
+If you are using the [binary](https://github.com/paradigmn/ultrastar_pitch/releases), everything should run out of the box.  
 In case of an error, try to install Microsoft Visual C++ Redistributable x64 (2010+2015).  
   
 If you want to use the python application do the following:  
