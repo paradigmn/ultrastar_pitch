@@ -103,7 +103,7 @@ Each modules can be used in your own project. Just import them like this:
 | 0.10    | first running implementation                                                          |
 
 ### legacy downloads
-[Old Binaries](https://drive.google.com/drive/folders/19c2Y6LVVfpqIB-leLPUehs-kihZVccyM?usp=sharing)
+[Old Binaries](https://drive.google.com/drive/folders/19c2Y6LVVfpqIB-leLPUehs-kihZVccyM?usp=sharing)  
 [Old Python Wheels](https://drive.google.com/drive/folders/1oCyOqvieQTcq-MWRKlbaoa4dBo5O7V7y?usp=sharing)
 
 ### todo
