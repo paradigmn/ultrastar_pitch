@@ -48,7 +48,7 @@ class ProjectParser:
         self.singable.clear()
         self.file_buffer.clear()
         self.proj_dir = os.path.dirname(note_file)
-        notes = open(note_file, "r", encoding="utf-8")
+        notes = open(note_file, "r", encoding="utf-8-sig")
         # buffer file for later reuse
         try:
             self.file_buffer = notes.read().splitlines(True)

@@ -79,6 +79,7 @@ Each modules can be used in your own project. Just import them like this:
 ### changelog
 | version | changelog                                                                             |
 |---------|---------------------------------------------------------------------------------------|
+| 1.0.1   | fixed encoding issues and enforce python version                                      |
 | 1.0.0   | minimalistic gui, new preprocessing algo, new model, api restructuring                |
 | 0.82    | use dynamic stride to accelerate processing, removed model initializer, minor fixes   |
 | 0.81    | fixed exception for silent audio input                                                |
@@ -103,6 +104,7 @@ Each modules can be used in your own project. Just import them like this:
 | 0.10    | first running implementation                                                          |
   
 ### todo
+* write unit tests  
 * more sophisticated statistical postprocessing  
 * evaluate approaches for partial automate timing detection  
 * siamese neural network for multi octave detection  
