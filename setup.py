@@ -8,8 +8,11 @@
 """
 
 import os
+import sys
 from setuptools import setup
 
+if sys.version_info < (3, 7) or sys.version_info >= (3, 9):
+    raise RuntimeError("This package requires Python 3.7 or 3.8")
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -30,6 +33,8 @@ setup(
         "Operating System :: POSIX :: Linux",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Topic :: Multimedia :: Sound/Audio :: Analysis",
@@ -47,7 +52,7 @@ setup(
             "ultrastar-pitch = ultrastar_pitch.ultrastar_pitch:main"
         ]
     },
-    install_requires=["numpy", "scipy", "onnxruntime"],
+    install_requires=["onnxruntime", "scipy", "numpy"],
     include_package_data=True,
     zip_safe=False,
 )
