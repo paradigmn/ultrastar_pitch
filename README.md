@@ -15,8 +15,7 @@ The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to
 In order to use spleeter with ultrastar-pitch, a couple of steps need to be performed:  
   
 * spleeter produces multiple outputs. The vocals.wav file needs to be placed in the same directory as the notes.txt file.  
-* in the notes.txt file the "#MP3" tag needs to be changed, that it refers to the vocal file (e.g. "#MP3:vocals.wav").  
-* after running ultrastar-pitch, the "#MP3" tag needs to be reverted back  
+* in the notes.txt file add the "#VOCALS" tag to refer to the vocal file (e.g. "#VOCALS:vocals.wav").
   
 ## installation
 If you are using the [binary](https://github.com/paradigmn/ultrastar_pitch/releases), everything should run out of the box.  
