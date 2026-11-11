@@ -9,28 +9,45 @@ For cli execution, just run the command in your project folder. Additional flags
 If everything went well a new file "notes_new.txt" should appear. In case a different output name is desired, it can be changed with the "-o" flag:  
 `ultrastar-pitch -o name_new.txt`  
 
-### spleeter
-The [spleeter project](https://github.com/deezer/spleeter) uses deep learning to separate the vocal- and instrumental part of a song. In some cases (mainly acoustic songs), ultrastar-pitch performs better with the isolated vocal data. In other cases, its accuracy drops due to the introduced artifacts / information loss.  
-  
-In order to use spleeter with ultrastar-pitch, a couple of steps need to be performed:  
-  
-* spleeter produces multiple outputs. The vocals.wav file needs to be placed in the same directory as the notes.txt file.  
-* in the notes.txt file add the "#VOCALS" tag to refer to the vocal file (e.g. "#VOCALS:vocals.wav").
-  
+### optional models (better accuracy)
+Two large models are not part of the package, because of their size. The tool looks for them in
+`$ULTRASTAR_PITCH_RMVPE_MODEL` / `$ULTRASTAR_PITCH_VOCAL_MODEL`, next to the binary, in the user data
+folder (`%LOCALAPPDATA%\ultrastar_pitch` on windows, `~/.local/share/ultrastar_pitch` on linux) and in a
+`models/` folder next to the sources; the path can also be given with `--rmvpe-model` / `--vocal-model`
+or chosen in the gui.
+
+* **rmvpe.onnx** (186 MB, MIT): the [RMVPE](https://huggingface.co/Scicom-intl/rmvpe-onnx) vocal pitch model.
+  If present, its result is combined with the built-in classifier. Measured on 197 songs this raises the
+  share of correct pitches from 68 % to 74 % (with the soft key postprocessing). Without it the built-in
+  classifier is used alone.
+* **htdemucs_vocals.onnx** (304 MB): the vocal separation model (export instructions in `dev/`). With `-s`
+  the vocals are isolated first (slow: about 20 s per minute of audio on a cpu, seconds on a gpu) and saved
+  as `vocals.wav` next to the note file, so it is only done once. Both models then run on the mix and on
+  the vocals and the votes are combined: another +1.5 points. An existing `vocals.wav` or a `#VOCALS`
+  header (e.g. from [spleeter](https://github.com/deezer/spleeter)) is used automatically.
+
 ## installation
 If you are using the [binary](https://github.com/paradigmn/ultrastar_pitch/releases), everything should run out of the box.  
 In case of an error, try to install Microsoft Visual C++ Redistributable x64 (2010+2015).  
   
-If you want to use the python application do the following:  
+If you want to use the Python application, install [uv](https://docs.astral.sh/uv/) first and then do the following:
 ### windows
 Install the newest version of [Python 3](https://www.python.org/downloads/windows/)  
 Install the newest build of [ffmpeg](https://de.wikihow.com/FFmpeg-unter-Windows-installieren)  
-Open CMD/Powershell and type:  
-`pip install ultrastar-pitch`  
+Open CMD/PowerShell and type:
+`uv tool install ultrastar-pitch`
+
+The Python package uses ONNX Runtime with GPU support by default. Install a compatible
+NVIDIA driver and CUDA/cuDNN runtime for GPU inference. CPU-only installations can
+replace `onnxruntime-gpu` with `onnxruntime` in a local environment if needed.
+
+The command-line mode does not require Tkinter. For the optional graphical interface,
+install Tkinter on Ubuntu with:
+`sudo apt install python3-tk`
 ### linux (debian)
-Open a terminal and type:  
-`sudo apt-get install python3 python3-pip ffmpeg`  
-`pip install ultrastar-pitch`  
+Open a terminal and type:
+`sudo apt-get install ffmpeg`
+`uv tool install ultrastar-pitch`
   
 ## flags
 Command line options for nono graphical execution:  
@@ -41,20 +58,34 @@ Command line options for nono graphical execution:
 | -o   | specify output file name              |
 | -g   | enable graphical user interface       |
 | -m   | disable stochastic postprocessing     |
+| -s   | separate the vocals first (needs the separation model), result is reused next time |
+| --vocal-model | path of the vocal separation model (htdemucs_vocals.onnx) |
+| --rmvpe-model | path of the RMVPE pitch model (rmvpe.onnx)       |
+| --no-rmvpe | use the built-in classifier only                    |
 | -a   | show prediction accuracy (debug flag) |
 | -l   | set logging level (debug flag)        |
   
 ## developer information
 ### build instructions (windows only)
 The software can be compiled into a single standalone binary. To achieve this, an additional package has to be installed.  
-`pip install pyinstaller`  
+`uv sync --group dev`
   
 To include ffmpeg into the binary, it needs to be placed as specified by the setup.spec file. The default would be "ffmpeg\bin\ffmpeg.exe" within the project root directory.  
   
-The building process is fairly easy. Just execute the following command within the cmd/powershell:  
-`pyinstaller setup.spec`  
+The building process is fairly easy. Just execute the following command within CMD/PowerShell:
+`uv run pyinstaller setup.spec`
+### local development
+Create the project environment and install all locked dependencies with:
+`uv sync`
+
+The command-line application can then be run with:
+`uv run ultrastar-pitch`
+
+Dependencies are declared without version pins in `pyproject.toml` and resolved in `uv.lock`.
+Refresh the lockfile to the newest compatible versions with:
+`uv lock --upgrade`
 ### implementation
-The software takes a timed usdx project file and the corresponding audio file. The song is converted into a mono wav and gets split into the predefined audio segments. These chunks are divided into blocks to be transformed into features. The output is then fed into a neuronal network to determine the pitches. Statistical postprocessing is used to determine pseudo key of the song. The predicted pitches are reevaluated to match the pseudo key.
+The software takes a timed usdx project file and the corresponding audio file. The song is converted into a mono wav and gets split into the predefined audio segments. These chunks are divided into blocks to be transformed into features. The output is then fed into a neuronal network, which yields the probabilities of the 12 pitch classes per note. If the RMVPE model is installed, its salience map is summed per note, folded to the 12 pitch classes and combined with the probabilities above (log-linear, weight 0.6). With separated vocals the models run on the mix and on the vocals and both votes are combined (vocals weight 0.35). Statistical postprocessing determines the pseudo key of the song and adds its pitch class probabilities as a soft prior to the scores, so only uncertain notes are moved towards the key (the old hard correction snapped every out-of-key note and lost accuracy within one semitone).
   
 The deep learning model was trained on a large karaoke database. Details for building your own model can be found in the dev/ folder.
   
@@ -70,6 +101,9 @@ The software consists of various modules:
 | AudioPreprocessor       | transform audio segments into features for pitch detection |
 | PitchClassifier         | predict pitches from features                              |
 | StochasticPostprocessor | increase prediction accuracy by applying stochastics       |
+| VocalSeparator          | isolate the vocals with the Demucs onnx model (optional)   |
+| rmvpe                   | RMVPE pitch model and the note features derived from it    |
+| tuning_correction       | tuning offset, pitch class per segment, global transposition |
 | DetectionPipeline       | execute the models above in one pipeline                   |
   
 Each modules can be used in your own project. Just import them like this:  
@@ -78,6 +112,7 @@ Each modules can be used in your own project. Just import them like this:
 ### changelog
 | version | changelog                                                                             |
 |---------|---------------------------------------------------------------------------------------|
+| 2.0.0   | note file format v1/v2, optional RMVPE ensemble and vocal separation, soft key prior, evaluation scripts in dev/ |
 | 1.0.1   | fixed encoding issues and enforce python version                                      |
 | 1.0.0   | minimalistic gui, new preprocessing algo, new model, api restructuring                |
 | 0.82    | use dynamic stride to accelerate processing, removed model initializer, minor fixes   |
@@ -108,7 +143,7 @@ Each modules can be used in your own project. Just import them like this:
 
 ### todo
 * write unit tests  
-* more sophisticated statistical postprocessing  
+* host the optional models as release assets and add a download helper  
 * evaluate approaches for partial automate timing detection  
 * siamese neural network for multi octave detection  
 * evaluate accuracy with higher samplerates  

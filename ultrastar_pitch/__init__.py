@@ -12,3 +12,4 @@ from .audio_preprocessor import AudioPreprocessor
 from .pitch_classifier import PitchClassifier
 from .stochastic_postprocessor import StochasticPostprocessor
 from .detection_pipeline import DetectionPipeline
+from .vocal_separator import VocalSeparator
