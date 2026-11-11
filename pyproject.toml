@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ultrastar_pitch"
+dynamic = ["version"]
+description = "Automate the pitch detection process for Ultrastar Deluxe karaoke projects"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE"}
+authors = [
+    {name = "paradigm", email = "ultrastarpitch@gmail.com"},
+]
+classifiers = [
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy",
+    "onnxruntime-gpu",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://github.com/paradigmn/ultrastar_pitch"
+
+[project.scripts]
+ultrastar-pitch = "ultrastar_pitch.ultrastar_pitch:main"
+
+[dependency-groups]
+dev = [
+    "onnx>=1.14.1",
+    "pyinstaller",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "ultrastar_pitch.version.__version__"}
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+packages = ["ultrastar_pitch", "ultrastar_pitch.binaries"]
+
+[tool.setuptools.package-data]
+ultrastar_pitch = [
+    "binaries/*.ico",
+    "binaries/*.png",
+    "binaries/*.onnx",
+    "binaries/README.md",
+]
