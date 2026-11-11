@@ -21,6 +21,8 @@ from .detection_pipeline import DetectionPipeline
 from .pitch_utils import prediction_score
 from .vocal_separator import MODEL_ENV_VAR, default_model_path
 from .rmvpe import RMVPE_MODEL_ENV_VAR, default_model_path as default_rmvpe_path
+from .model_download import MODELS, ModelDownloadError, download_models
+from .model_files import user_model_dir
 
 
 def main():
@@ -84,6 +86,14 @@ def main():
         help="use the built-in classifier only, even if the RMVPE model is installed",
     )
     parser.add_argument(
+        "--download-models",
+        nargs="?",
+        const="all",
+        choices=["all"] + sorted(MODELS),
+        default=None,
+        help="download the optional models (rmvpe, vocals or all) into the user data folder and exit",
+    )
+    parser.add_argument(
         "-g",
         "--gui",
         default=False,
@@ -111,10 +121,25 @@ def main():
         level=log_levels.get(args.log.lower()),
     )
     # configure and init pipeline pitch detection
+    if args.download_models:
+        names = sorted(MODELS) if args.download_models == "all" else [args.download_models]
+        print("downloading into " + user_model_dir())
+
+        def show(file_name: str, done: int, total: int):
+            print("  {0}: {1:.0f} / {2:.0f} MB".format(file_name, done / 1e6, total / 1e6), end="\r", flush=True)
+
+        try:
+            for path in download_models(names, progress=show):
+                print("\n  ok: " + path)
+        except ModelDownloadError as err:
+            print()
+            sys.exit("error: {0}".format(err))
+        return
     vocal_model = args.vocal_model or default_model_path()
     if args.separate and not vocal_model:
         parser.error(
-            "--separate needs a vocal separation model: pass --vocal-model or set $" + MODEL_ENV_VAR
+            "--separate needs the vocal separation model: run --download-models vocals, pass "
+            "--vocal-model or set $" + MODEL_ENV_VAR
         )
     detection_pipeline = DetectionPipeline(
         ProjectParser(),
@@ -127,7 +152,8 @@ def main():
     )
     if args.use_rmvpe and not (args.rmvpe_model or default_rmvpe_path()):
         print(
-            "note: rmvpe.onnx not found, using the built-in classifier only (see README for the download)"
+            "note: rmvpe.onnx not found, using the built-in classifier only "
+            "(download it with: ultrastar-pitch --download-models)"
         )
     # run graphical user interface for pitch detection
     if args.gui or getattr(sys, "frozen", False):

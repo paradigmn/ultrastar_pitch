@@ -10,7 +10,10 @@ If everything went well a new file "notes_new.txt" should appear. In case a diff
 `ultrastar-pitch -o name_new.txt`  
 
 ### optional models (better accuracy)
-Two large models are not part of the package, because of their size. The tool looks for them in
+Two large models are not part of the package, because of their size. They are published in the release
+[models-v1](https://github.com/paradigmn/ultrastar_pitch/releases/tag/models-v1) and can be downloaded with
+`ultrastar-pitch --download-models` (or the button in the gui), which checks the SHA-256 checksums and puts
+them into the user data folder. The tool looks for them in
 `$ULTRASTAR_PITCH_RMVPE_MODEL` / `$ULTRASTAR_PITCH_VOCAL_MODEL`, next to the binary, in the user data
 folder (`%LOCALAPPDATA%\ultrastar_pitch` on windows, `~/.local/share/ultrastar_pitch` on linux) and in a
 `models/` folder next to the sources; the path can also be given with `--rmvpe-model` / `--vocal-model`
@@ -62,6 +65,7 @@ Command line options for nono graphical execution:
 | --vocal-model | path of the vocal separation model (htdemucs_vocals.onnx) |
 | --rmvpe-model | path of the RMVPE pitch model (rmvpe.onnx)       |
 | --no-rmvpe | use the built-in classifier only                    |
+| --download-models | download the optional models (rmvpe, vocals or all) and exit |
 | -a   | show prediction accuracy (debug flag) |
 | -l   | set logging level (debug flag)        |
   
@@ -143,7 +147,6 @@ Each modules can be used in your own project. Just import them like this:
 
 ### todo
 * write unit tests  
-* host the optional models as release assets and add a download helper  
 * evaluate approaches for partial automate timing detection  
 * siamese neural network for multi octave detection  
 * evaluate accuracy with higher samplerates  

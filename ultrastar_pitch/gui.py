@@ -20,6 +20,7 @@ import logging
 from .detection_pipeline import DetectionPipeline
 from .vocal_separator import default_model_path
 from .rmvpe import default_model_path as default_rmvpe_path
+from .model_download import MODELS, download_models
 
 
 class Gui(tk.Frame):
@@ -36,7 +37,7 @@ class Gui(tk.Frame):
         self._worker = None
         # build window
         root.title("ultrastar_pitch")
-        root.geometry("600x330")
+        root.geometry("600x360")
         # set icon depending on os and execution method
         if getattr(sys, "frozen", False):
             icon_path = sys._MEIPASS
@@ -92,6 +93,9 @@ class Gui(tk.Frame):
         self.rmvpe_txt.place(width=350, x=130, y=285)
         rmvpe_btn = tk.Button(root, text="...", command=self.load_rmvpe)
         rmvpe_btn.place(width=30, x=485, y=283)
+        # download of the optional models into the user data folder
+        self.download_btn = tk.Button(root, text="Download models (490 MB)", command=self.download)
+        self.download_btn.place(width=200, x=130, y=318)
         root.mainloop()
 
     def load_notes(self):
@@ -124,6 +128,27 @@ class Gui(tk.Frame):
             return
         self.rmvpe_txt.delete(0, tk.END)
         self.rmvpe_txt.insert(0, model_file.name)
+
+    def download(self):
+        """ callback for the download button, loads both optional models in a worker thread """
+        if self._worker is not None and self._worker.is_alive():
+            return
+        self.download_btn.configure(state=tk.DISABLED)
+        self.run_btn.configure(state=tk.DISABLED)
+
+        def progress(file_name: str, done: int, total: int):
+            self._events.put(("progress", "{0}: {1:.0f} / {2:.0f} MB".format(file_name, done / 1e6, total / 1e6)))
+
+        def work():
+            try:
+                paths = download_models(sorted(MODELS), progress=progress)
+                self._events.put(("downloaded", paths))
+            except Exception as err:  # reported in the gui thread
+                self._events.put(("error", err))
+
+        self._worker = threading.Thread(target=work, daemon=True)
+        self._worker.start()
+        self.root.after(100, self._poll_events)
 
     def predict_pitches(self):
         """ callback for run button, predicts new pitches in a worker thread (the separation
@@ -164,6 +189,15 @@ class Gui(tk.Frame):
                 kind, payload = self._events.get_nowait()
                 if kind == "progress":
                     self.done_lbl.configure(text=payload)
+                elif kind == "downloaded":
+                    self.done_lbl.configure(text="models downloaded")
+                    self.download_btn.configure(state=tk.NORMAL)
+                    self.run_btn.configure(state=tk.NORMAL)
+                    self.rmvpe_txt.delete(0, tk.END)
+                    self.rmvpe_txt.insert(0, default_rmvpe_path() or "")
+                    self.model_txt.delete(0, tk.END)
+                    self.model_txt.insert(0, default_model_path() or "")
+                    return
                 elif kind == "done":
                     self.done_lbl.configure(text="done! ({0}, {1})".format(
                         self.detection_pipeline.last_models, self.detection_pipeline.last_sources))
@@ -173,6 +207,7 @@ class Gui(tk.Frame):
                 else:
                     self.done_lbl.configure(text="failed!")
                     self.run_btn.configure(state=tk.NORMAL)
+                    self.download_btn.configure(state=tk.NORMAL)
                     self._show_error(payload)
                     return
         except queue.Empty:
