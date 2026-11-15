@@ -17,7 +17,7 @@ position in its partner phrases (same lyrics or same rhythm), each partner shift
 transposition that fits the audio evidence of both phrases best. A short note that the models
 can't resolve gets the evidence of the longer or clearer sung repetitions this way.
 
-Measured (197 songs, mix, timing of the file, see dev/context_eval.py): together with the soft key
+Measured (197 songs, mix, timing of the file, see dev/README.md): together with the soft key
 prior 75.3 % exact instead of 73.6 % (+1.6 points [+1.2 .. +2.0], paired per song), notes shorter
 than 60 ms 56.1 % instead of 53.6 %.
 """
