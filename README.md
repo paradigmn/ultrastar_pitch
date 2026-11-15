@@ -1,5 +1,14 @@
 # ultrastar_pitch
 This python application automates the pitch detection for ultrastar deluxe projects.  
+
+> **AI assistance from version 2.0.0 on:** the 2.x versions are developed with the help of an AI system
+> (Anthropic's Claude, used through Claude Code). The new pitch model, the pipeline, the evaluation scripts and
+> parts of the documentation were designed, implemented and measured with its help; the maintainer set the goals
+> and decided which changes went into the software. If you run into problems with 2.x, version 1.0.1, the last
+> version without AI assistance, is still available: `uv tool install --python 3.8 "ultrastar-pitch==1.0.1"`
+> (or `pip install ultrastar-pitch==1.0.1` with Python 3.7 or 3.8), and the windows binary of version 1.0.0 is on
+> the [releases page](https://github.com/paradigmn/ultrastar_pitch/releases/tag/v1.0.0). Please report problems
+> as an [issue](https://github.com/paradigmn/ultrastar_pitch/issues).
   
 ## usage
 The software can be used with user interface or as command line application. The windows [binary](https://github.com/paradigmn/ultrastar_pitch/releases) automatically starts as a graphical user application.
@@ -167,15 +176,5 @@ Each modules can be used in your own project. Just import them like this:
 ### credits
 The line break rules, the whitespace fix and the style checks of `note_hygiene` are adapted from [ultrastar-scripts](https://github.com/barbeque-squared/ultrastar-scripts) by barbeque-squared, used under the MIT license (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Thanks for sharing them!
 
-### legacy downloads
-[Old Binaries](https://drive.google.com/drive/folders/19c2Y6LVVfpqIB-leLPUehs-kihZVccyM?usp=sharing)  
-[Old Python Wheels](https://drive.google.com/drive/folders/1oCyOqvieQTcq-MWRKlbaoa4dBo5O7V7y?usp=sharing)
-
 ### todo
-* write unit tests  
 * evaluate approaches for partial automate timing detection  
-* siamese neural network for multi octave detection  
-* evaluate accuracy with higher samplerates  
-* integrate resampling into model  
-* evaluate accuracy with sequence models (rnns, grus, lstms)  
-* more logging  
