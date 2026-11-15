@@ -352,6 +352,8 @@ class ProjectParser:
         singable = []
         voices = set()
         voice = 1  # without a voice change the notes belong to the first voice
+        # phrase number: counts "-" lines and voice changes, used to find repeated phrases
+        phrase = 0
         for idx in range(body_start, len(lines)):
             line = lines[idx].rstrip("\n")
             stripped = line.strip()
@@ -381,18 +383,28 @@ class ProjectParser:
                         "t_end": gap + (start + duration) * ms_per_beat,
                         # pitch is relative to C4 and can be negative, python's modulo is safe
                         "pitch": int(match.group("pitch")) % 12,
+                        # the pitch as written in the file and the one to write (see update_pitches)
+                        "pitch_file": int(match.group("pitch")),
+                        "pitch_out": int(match.group("pitch")),
                         "voice": voice,
                         "line": idx,
                         "span": match.span("pitch"),
+                        # context for the postprocessing (see repetition_pooling.py)
+                        "beat": start,
+                        "length": duration,
+                        "phrase": phrase,
+                        # syllable: the text after the pitch (one separating space removed)
+                        "text": line[match.end("pitch"):][1:],
                     }
                 )
             elif kind in "FRG":
                 # freestyle, rap and golden rap carry no usable pitch, but they belong to a voice
                 voices.add(voice)
             elif kind == "-":
-                continue  # end of phrase
+                phrase += 1  # end of phrase
             elif kind == "P" and _VOICE_RE.match(line):
                 voice = int(_VOICE_RE.match(line).group("voice"))
+                phrase += 1
             elif kind == "B" and legacy and _BPM_CHANGE_RE.match(line):
                 raise UnsupportedFeatureError(
                     "bpm changes ('B' lines) are not supported", idx + 1
@@ -414,8 +426,16 @@ class ProjectParser:
         """ returns singable pitches """
         return [singable["pitch"] for singable in self.singable]
 
-    def update_pitches(self, new_pitches: list):
-        """ replace old singable pitches by newly calculated ones """
+    @staticmethod
+    def nearest_octave(pitch: int, reference: int) -> int:
+        """ the pitch with the pitch class of pitch that is closest to reference (6 semitones: below) """
+        return reference + (pitch - reference + 6) % 12 - 6
+
+    def update_pitches(self, new_pitches: list, keep_octave: bool = True):
+        """ replace old singable pitches by newly calculated ones. keep_octave: only the pitch class
+            of a new pitch counts, it is written in the octave closest to the pitch of the note in the
+            file (an unchanged pitch class leaves the note as it is, the melody keeps its contour);
+            False writes the new pitches as they are (the pitch detection gives 0 .. 11) """
         if len(new_pitches) != len(self.singable):
             raise PitchUpdateError(
                 "pitches can't be updated, array size doesn't match ({0} != {1})".format(
@@ -428,21 +448,38 @@ class ProjectParser:
             raise PitchUpdateError("new pitches have to be integers: {0}".format(err)) from err
         for singable, new_pitch in zip(self.singable, converted):
             singable["pitch"] = new_pitch
+            singable["pitch_out"] = (
+                self.nearest_octave(new_pitch, singable["pitch_file"]) if keep_octave else new_pitch
+            )
 
-    def save_note_file(self, note_file: str):
-        """ save updated note file under a new name """
+    @property
+    def body_start(self) -> int:
+        """ index of the first line after the header in file_buffer """
+        return self._body_start
+
+    def render_lines(self) -> List[str]:
+        """ the lines of the note file with the updated pitches (only the pitch column of changed
+            pitches is replaced, everything else stays untouched) """
         self._require_loaded()
         lines = list(self.file_buffer)
-        # only the pitch column is replaced, everything else stays untouched
         for singable in self.singable:
+            if singable["pitch_out"] == singable["pitch_file"]:
+                continue
             idx = singable["line"]
             begin, end = singable["span"]
-            lines[idx] = lines[idx][:begin] + str(int(singable["pitch"])) + lines[idx][end:]
+            lines[idx] = lines[idx][:begin] + str(int(singable["pitch_out"])) + lines[idx][end:]
         if self.encoding != "utf-8":
             # the output is always utf-8, a stale #ENCODING header would corrupt it
             for idx in range(self._body_start):
                 if _ENCODING_HEADER_RE.match(lines[idx]):
                     lines[idx] = "#ENCODING:UTF-8\n"
+        return lines
+
+    def save_note_file(self, note_file: str, lines: Optional[List[str]] = None):
+        """ save updated note file under a new name; lines: the content to write (default: render_lines()) """
+        self._require_loaded()
+        if lines is None:
+            lines = self.render_lines()
         note_file = os.fspath(note_file)
         tmp_path = None
         try:
@@ -719,6 +756,14 @@ class ProjectParser:
                 self._save_vocals(raw_path, audio_path, separator)
             return samples
 
+    def find_referenced_file(self, key: str) -> str:
+        """ absolute path of the file a header references (#COVER, #VIDEO, ...); raises
+            MissingHeaderError, UnsafeFileReferenceError or AudioFileNotFoundError """
+        self._require_loaded()
+        if not self.meta.get(key):
+            raise MissingHeaderError("header {0} is not set".format(key))
+        return self._find_audio_file(key, str(self.meta[key]))
+
     def find_audio_file(self) -> Tuple[str, str]:
         """ header (#VOCALS, #AUDIO or #MP3) and absolute path of the audio file the song references """
         self._require_loaded()
@@ -764,6 +809,13 @@ class ProjectParser:
         """ (start, end) of every singable note in seconds """
         self._require_loaded()
         return [(segment["t_start"] / 1000.0, segment["t_end"] / 1000.0) for segment in self.singable]
+
+    def note_context(self) -> Dict[str, list]:
+        """ lists with one entry per singable note: "phrases" (phrase number, unique over all
+            voices), "beats" (start beat), "lengths" (beats) and "texts" (syllable), the arguments
+            of repetition_pooling.pool_repetitions """
+        self._require_loaded()
+        return {key + "s": [segment[key] for segment in self.singable] for key in ("phrase", "beat", "length", "text")}
 
     def note_bounds(self, sample_rate: int, offset_s: float = 0.0) -> List[Tuple[int, int]]:
         """ (start, end) of every singable note in samples, shifted by offset_s (negative values

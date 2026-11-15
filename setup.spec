@@ -12,7 +12,8 @@ import os
 MODULE = "ultrastar_pitch_runner.py"
 FFMPEG_BIN = "ffmpeg.exe"
 FFMPEG_DIR = "ffmpeg\\bin\\"
-MODEL_ONNX = "pitchnet_2020_12_14.onnx"
+MODEL_ONNX = "pitchnet_2026_11_13.onnx"
+CONTEXT_ONNX = "context_gru_ensemble_2026_11_13.onnx"
 ICON_BIN = "icon.ico"
 BIN_DIR = "ultrastar_pitch\\binaries\\"
 BLOCK_CIPHER = None
@@ -40,6 +41,7 @@ exe = EXE(
     a.binaries
     + [(FFMPEG_BIN, os.path.join(FFMPEG_DIR, FFMPEG_BIN), "BINARY")]
     + [(MODEL_ONNX, os.path.join(BIN_DIR, MODEL_ONNX), "BINARY")]
+    + [(CONTEXT_ONNX, os.path.join(BIN_DIR, CONTEXT_ONNX), "BINARY")]
     + [(ICON_BIN, os.path.join(BIN_DIR, ICON_BIN), "BINARY")],
     a.zipfiles,
     a.datas,

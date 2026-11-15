@@ -17,10 +17,11 @@ from tkinter import messagebox
 from subprocess import CalledProcessError
 import logging
 
-from .detection_pipeline import DetectionPipeline
+from .detection_pipeline import DetectionPipeline, check_note_file
 from .vocal_separator import default_model_path
 from .rmvpe import default_model_path as default_rmvpe_path
 from .model_download import MODELS, download_models
+from . import note_hygiene
 
 
 class Gui(tk.Frame):
@@ -37,7 +38,7 @@ class Gui(tk.Frame):
         self._worker = None
         # build window
         root.title("ultrastar_pitch")
-        root.geometry("600x360")
+        root.geometry("600x385")
         # set icon depending on os and execution method
         if getattr(sys, "frozen", False):
             icon_path = sys._MEIPASS
@@ -60,9 +61,12 @@ class Gui(tk.Frame):
         self.path_txt.focus()
         # load and run buttons
         load_btn = tk.Button(root, text="Load", command=self.load_notes)
-        load_btn.place(width=100, x=185, y=110)
+        load_btn.place(width=85, x=160, y=110)
+        # check the note file only (no pitch detection), see note_hygiene.py
+        self.check_btn = tk.Button(root, text="Check", command=self.check_notes)
+        self.check_btn.place(width=85, x=255, y=110)
         self.run_btn = tk.Button(root, text="Run", command=self.predict_pitches)
-        self.run_btn.place(width=100, x=310, y=110)
+        self.run_btn.place(width=85, x=350, y=110)
         # postprocessing checkbutton
         self.postproc_chk_state = tk.BooleanVar()
         self.postproc_chk_state.set(True)
@@ -70,6 +74,13 @@ class Gui(tk.Frame):
             root, text="Enable Postprocessing", var=self.postproc_chk_state
         )
         postproc_chk.place(x=10, y=200)
+        # timing correction checkbutton (needs RMVPE)
+        self.timing_chk_state = tk.BooleanVar()
+        self.timing_chk_state.set(detection_pipeline.correct_timing)
+        timing_chk = tk.Checkbutton(
+            root, text="Correct timing for the analysis (RMVPE)", var=self.timing_chk_state
+        )
+        timing_chk.place(x=230, y=200)
         # vocal separation: checkbutton and model path
         self.separate_chk_state = tk.BooleanVar()
         self.separate_chk_state.set(False)
@@ -78,24 +89,38 @@ class Gui(tk.Frame):
             var=self.separate_chk_state,
         )
         separate_chk.place(x=10, y=225)
+        # note file hygiene (note_hygiene.py): fixes of the written file and the style report
+        self.fix_chk_states = {}
+        for i, (name, text) in enumerate((
+            ("structure", "Fix structure"),
+            ("linebreaks", "Fix line breaks"),
+            ("whitespace", "Fix spaces"),
+        )):
+            state = tk.BooleanVar()
+            state.set(name in detection_pipeline.fixes)
+            tk.Checkbutton(root, text=text, var=state).place(x=10 + 125 * i, y=250)
+            self.fix_chk_states[name] = state
+        self.style_chk_state = tk.BooleanVar()
+        self.style_chk_state.set(detection_pipeline.style_check)
+        tk.Checkbutton(root, text="Style hints", var=self.style_chk_state).place(x=385, y=250)
         model_lbl = tk.Label(root, text="Separation model:")
-        model_lbl.place(x=10, y=255)
+        model_lbl.place(x=10, y=280)
         self.model_txt = tk.Entry(root)
         self.model_txt.insert(0, detection_pipeline.vocal_model or default_model_path() or "")
-        self.model_txt.place(width=350, x=130, y=255)
+        self.model_txt.place(width=350, x=130, y=280)
         model_btn = tk.Button(root, text="...", command=self.load_model)
-        model_btn.place(width=30, x=485, y=253)
+        model_btn.place(width=30, x=485, y=278)
         # RMVPE pitch model (optional, combined with the built-in classifier)
         rmvpe_lbl = tk.Label(root, text="RMVPE model:")
-        rmvpe_lbl.place(x=10, y=285)
+        rmvpe_lbl.place(x=10, y=310)
         self.rmvpe_txt = tk.Entry(root)
         self.rmvpe_txt.insert(0, detection_pipeline.rmvpe_model or default_rmvpe_path() or "")
-        self.rmvpe_txt.place(width=350, x=130, y=285)
+        self.rmvpe_txt.place(width=350, x=130, y=310)
         rmvpe_btn = tk.Button(root, text="...", command=self.load_rmvpe)
-        rmvpe_btn.place(width=30, x=485, y=283)
+        rmvpe_btn.place(width=30, x=485, y=308)
         # download of the optional models into the user data folder
         self.download_btn = tk.Button(root, text="Download models (490 MB)", command=self.download)
-        self.download_btn.place(width=200, x=130, y=318)
+        self.download_btn.place(width=200, x=130, y=343)
         root.mainloop()
 
     def load_notes(self):
@@ -150,6 +175,28 @@ class Gui(tk.Frame):
         self._worker.start()
         self.root.after(100, self._poll_events)
 
+    def check_notes(self):
+        """ callback for the check button: the note file hygiene without the pitch detection (takes a
+            fraction of a second), with fixes a fixed copy <name>_fixed.txt is written """
+        if self._worker is not None and self._worker.is_alive():
+            return
+        fixes = tuple(name for name in note_hygiene.FIXES if self.fix_chk_states[name].get())
+        style = self.style_chk_state.get()
+        result = check_note_file(self.path_txt.get(), style=style, fixes=fixes)
+        lines = result.report()
+        if result.error:
+            self.done_lbl.configure(text="check: the file can't be read")
+        else:
+            self.done_lbl.configure(text="check: {0}".format(
+                "problems found" if result.has_errors or result.parser_warnings else "no problems found"))
+        text = "\n".join("- " + line for line in lines) or "no problems found"
+        if style and not result.error and not any(i.severity == note_hygiene.STYLE for i in result.issues):
+            text += "\n- style: no hints"
+        if result.has_errors or result.parser_warnings or result.write_error:
+            messagebox.showwarning("check the note file", text)
+        else:
+            messagebox.showinfo("check the note file", text)
+
     def predict_pitches(self):
         """ callback for run button, predicts new pitches in a worker thread (the separation
             takes minutes) and generates a new notes.txt """
@@ -161,6 +208,9 @@ class Gui(tk.Frame):
         separate = self.separate_chk_state.get()
         self.detection_pipeline.vocal_model = self.model_txt.get().strip() or None
         self.detection_pipeline.rmvpe_model = self.rmvpe_txt.get().strip() or None
+        self.detection_pipeline.correct_timing = self.timing_chk_state.get()
+        self.detection_pipeline.fixes = tuple(name for name in note_hygiene.FIXES if self.fix_chk_states[name].get())
+        self.detection_pipeline.style_check = self.style_chk_state.get()
         logging.debug("predicting file: %s", notes_org)
         logging.debug("postprocessing: %s, separate vocals: %s", postproc, separate)
         self.done_lbl.configure(text="working ...")
@@ -199,10 +249,13 @@ class Gui(tk.Frame):
                     self.model_txt.insert(0, default_model_path() or "")
                     return
                 elif kind == "done":
-                    self.done_lbl.configure(text="done! ({0}, {1})".format(
-                        self.detection_pipeline.last_models, self.detection_pipeline.last_sources))
+                    timing = self.detection_pipeline.last_timing
+                    shift = ", timing {0:+.0f} ms".format(1000 * timing.applied_s) if timing and timing.applied_s else ""
+                    self.done_lbl.configure(text="done! ({0}, {1}{2})".format(
+                        self.detection_pipeline.last_models, self.detection_pipeline.last_sources, shift))
                     self.run_btn.configure(state=tk.NORMAL)
                     logging.info("predicted pitches successfully!")
+                    self._show_report(timing)
                     return
                 else:
                     self.done_lbl.configure(text="failed!")
@@ -213,6 +266,25 @@ class Gui(tk.Frame):
         except queue.Empty:
             pass
         self.root.after(100, self._poll_events)
+
+    def _show_report(self, timing):
+        """ warnings of the timing check and the note file hygiene, style hints and fixes """
+        pipe = self.detection_pipeline
+        warnings = list(timing.warnings) if timing else []
+        errors = note_hygiene.summarize(pipe.last_hygiene, note_hygiene.ERROR, pipe.fixes)
+        if errors:
+            warnings.append("note file:\n- " + "\n- ".join(errors))
+        notes = []
+        if pipe.style_check:
+            hints = note_hygiene.summarize(pipe.last_hygiene, note_hygiene.STYLE, pipe.fixes)
+            notes.append("style hints:\n- " + "\n- ".join(hints) if hints else "style hints: none")
+        if pipe.last_fixes:
+            notes.append("fixed in notes_new.txt:\n- " + "\n- ".join(
+                "{0} {1}".format(count, what) for what, count in pipe.last_fixes.items()))
+        if warnings:
+            messagebox.showwarning("check the song", "\n\n".join(warnings + notes))
+        elif notes:
+            messagebox.showinfo("note file", "\n\n".join(notes))
 
     @staticmethod
     def _show_error(err: Exception):

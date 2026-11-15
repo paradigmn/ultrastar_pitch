@@ -1,4 +1,7 @@
 include README.md
 include ultrastar_pitch/binaries/icon.ico
 include ultrastar_pitch/binaries/icon.png
+include ultrastar_pitch/binaries/pitchnet_2026_11_13.onnx
+include ultrastar_pitch/binaries/context_gru_ensemble_2026_11_13.onnx
 include ultrastar_pitch/binaries/pitchnet_2020_12_14.onnx
+include THIRD_PARTY_NOTICES.md
