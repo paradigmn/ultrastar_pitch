@@ -11,12 +11,11 @@ import os
 
 MODULE = "ultrastar_pitch_runner.py"
 FFMPEG_BIN = "ffmpeg.exe"
-FFMPEG_DIR = "ffmpeg\\bin\\"
+FFMPEG_DIR = os.path.join("ffmpeg", "bin")
 MODEL_ONNX = "pitchnet_2026_11_13.onnx"
 CONTEXT_ONNX = "context_gru_ensemble_2026_11_13.onnx"
 ICON_BIN = "icon.ico"
-BIN_DIR = "ultrastar_pitch\\binaries\\"
-BLOCK_CIPHER = None
+BIN_DIR = os.path.join("ultrastar_pitch", "binaries")
 
 a = Analysis(
     [MODULE],
@@ -27,13 +26,10 @@ a = Analysis(
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=BLOCK_CIPHER,
     noarchive=False,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=BLOCK_CIPHER)
+pyz = PYZ(a.pure, a.zipped_data)
 
 exe = EXE(
     pyz,
